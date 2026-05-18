@@ -3,6 +3,7 @@ package daemon
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -50,6 +51,9 @@ func TestReadPIDNoFile(t *testing.T) {
 }
 
 func TestReadPIDCurrentProcess(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Signal(0) liveness check not supported on Windows")
+	}
 	withTempDir(t)
 	myPID := os.Getpid()
 	_ = WritePID(myPID)
@@ -72,6 +76,9 @@ func TestReadPIDDeadProcess(t *testing.T) {
 // --- Shell patching tests ---
 
 func TestPatchUnpatchShell(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell patching uses $HOME/$SHELL — not applicable on Windows")
+	}
 	dir := withTempDir(t)
 	// Force zsh so we get a deterministic RC path.
 	origShell := os.Getenv("SHELL")
