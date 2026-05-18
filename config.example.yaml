@@ -1,0 +1,32 @@
+proxy:
+  listen: "127.0.0.1:4191"
+  mode: sidecar          # sidecar | shared
+  service_id: my-agent   # identifies this instance in metrics
+
+sinks:
+  sqlite:
+    enabled: true
+    options:
+      path: "~/.local/share/tokenmeter/events.db"
+  otel:
+    enabled: false
+    options:
+      endpoint: "localhost:4317"
+  prometheus:
+    enabled: false
+    options:
+      listen: "127.0.0.1:9090"
+
+middleware:
+  - name: redaction      # opt-in PII stripping — disabled by default
+    options:
+      enabled: false
+
+privacy:
+  data_minimisation: false   # true = drop service_id, keep counts only
+  hash_service_id: true
+  encrypt_at_rest: false
+  encryption_key: ""         # set via TOKENMETER_ENCRYPTION_KEY env var
+
+retention:
+  days: 90                   # auto-purge records older than this

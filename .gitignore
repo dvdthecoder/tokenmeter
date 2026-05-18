@@ -1,0 +1,25 @@
+# Build output
+dist/
+bin/
+*.exe
+
+# Data — never commit local token databases
+*.db
+*.db-shm
+*.db-wal
+
+# Config with secrets
+config.local.yaml
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/settings.json
+*.swp
+
+# Go
+vendor/
