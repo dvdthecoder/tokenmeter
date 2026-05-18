@@ -14,10 +14,10 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 6 | v0.6 | Gemini provider | ✅ Done |
 | 7 | v0.7 | Per-user attribution | Planned |
 | 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | Planned |
-| 9 | v0.9 | GDPR tooling + redaction | Planned |
-| 10 | v0.10 | Plugin scaffold + webhook + cost alerts | Planned |
-| 11 | v0.11 | Local SLM insights (privacy-first, on-device) | Planned |
-| 12 | v0.12 | VS Code extension + Cursor + Windsurf | Planned |
+| 9 | v0.9 | Local SLM insights (on-device, Ollama) | Planned |
+| 10 | v0.10 | VS Code extension + Cursor + Windsurf surface | Planned |
+| 11 | v0.11 | Central collection hardening + GDPR facade | Planned |
+| 12 | v0.12 | Plugin scaffold + webhook + cost alerts | Planned |
 
 ---
 
@@ -98,43 +98,46 @@ Enterprise model coverage — the two largest sources of LLM traffic not yet cap
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-8)
 
-## Planned — Iteration 9 — GDPR tooling + redaction (v0.9)
+## Planned — Iteration 9 — Local SLM insights (v0.9)
 
-- Redaction middleware (PII regex, configurable opt-in)
-- SQLite encryption at rest (`TOKENMETER_ENCRYPTION_KEY`)
-- `privacy.data_minimisation` mode (strips attribution fields)
+Privacy-first, on-device analysis via Ollama — no data leaves the machine:
+
+- `tokenmeter insights` — runs a local SLM against SQLite data, streams answer to terminal
+- `tokenmeter insights --last 7d --format markdown` — weekly digest for PR comments / reports
+- Natural-language output: cost patterns, cache efficiency, model right-sizing suggestions, spend anomalies
+- Context builder sends only aggregated counts + costs — never raw prompts or responses
+- Config: `insights.ollama_url`, `insights.model` (default `phi4-mini`), `insights.context_rows`
+- Graceful error if Ollama not running (install hint printed)
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-9)
 
-## Planned — Iteration 10 — Plugin scaffold + webhook + cost alerts (v0.10)
+## Planned — Iteration 10 — VS Code extension + Cursor + Windsurf surface (v0.10)
 
-- `tokenmeter scaffold` fully implemented for all four plugin types (provider, sink, middleware, backend)
-- Webhook sink — POST `UsageEvent` JSON to any endpoint
-- Cost-alert middleware — configurable USD threshold → log + webhook
-- Prometheus `/metrics` scrape endpoint (optional, for shared deployment)
+- TypeScript extension in `extensions/vscode/`
+- Status bar: live session token count + estimated cost
+- Webview dashboard: usage by model + cost over time (reads local SQLite)
+- Auto-starts daemon if not running
+- Cursor + Windsurf backend adapters
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-10)
 
-## Planned — Iteration 11 — Local SLM insights (v0.11)
+## Planned — Iteration 11 — Central collection hardening + GDPR facade (v0.11)
 
-Privacy-first, on-device analysis — no data leaves the machine:
+GDPR tooling is sequenced here because it's the privacy layer applied *when* data is productionised to flow to a shared central collector — not before. The facade pattern: obfuscate at the edge before anything leaves.
 
-- `tokenmeter insights` — runs a local SLM via Ollama against SQLite data
-- Natural-language cost pattern analysis, cache efficiency advice, model right-sizing suggestions
-- `tokenmeter insights --last 7d --format markdown` — weekly digest
-- Context builder: aggregated counts + costs only, never raw prompts/responses
-- Config: `insights.ollama_url`, `insights.model`, `insights.context_rows`
-- **Prerequisite before productionising central streaming** — gives every user immediate value from local data without needing any infra
+- Redaction middleware (PII regex, configurable opt-in) — strips content before OTEL push
+- SQLite encryption at rest (`TOKENMETER_ENCRYPTION_KEY`) — edge data at rest
+- `privacy.data_minimisation` mode — strips attribution fields, keeps counts + cost only
+- Central collector production hardening — TLS, auth, retention policies
+- Prometheus `/metrics` scrape endpoint (for shared/team deployments)
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-11)
 
-## Planned — Iteration 12 — VS Code extension + Cursor + Windsurf (v0.12)
+## Planned — Iteration 12 — Plugin scaffold + webhook + cost alerts (v0.12)
 
-- TypeScript extension in `extensions/vscode/`
-- Status bar: live session token count + cost
-- Webview dashboard: usage by model + cost over time
-- Auto-starts daemon if not running
-- Cursor + Windsurf backend adapters
+- `tokenmeter scaffold` fully implemented for all four plugin types
+- Webhook sink — POST `UsageEvent` JSON to any endpoint
+- Cost-alert middleware — configurable USD threshold → log + webhook
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-12)
 
