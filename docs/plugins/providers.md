@@ -47,6 +47,25 @@ tokenmeter scaffold provider gemini
 - Final usage chunk carries `prompt_tokens`, `completion_tokens`, `prompt_tokens_details.cached_tokens`
 - Unknown models return `$0.00` cost (correct for self-hosted)
 
+## Reference: Gemini provider
+
+`plugins/providers/gemini/gemini.go` handles the Google Gemini API (`generativelanguage.googleapis.com`):
+
+- `ModifyRequest` is a no-op — Gemini streaming includes `usageMetadata` in the final chunk natively
+- Stream parser overwrites on each chunk — the final chunk always has authoritative totals
+- `usageMetadata.cachedContentTokenCount` mapped to `cached`; no cache-write token concept (always 0)
+- Pricing table covers 7 models; cached tokens billed at 25% of input price; unknown models fall back to gemini-2.0-flash
+
+| Model | Input / 1M | Output / 1M |
+|---|---|---|
+| gemini-2.5-pro | $1.25 | $10.00 |
+| gemini-2.5-flash | $0.15 | $0.60 |
+| gemini-2.0-flash | $0.10 | $0.40 |
+| gemini-2.0-flash-lite | $0.075 | $0.30 |
+| gemini-1.5-pro | $1.25 | $5.00 |
+| gemini-1.5-flash | $0.075 | $0.30 |
+| gemini-1.5-flash-8b | $0.0375 | $0.15 |
+
 ## Writing a new provider
 
 1. Run `tokenmeter scaffold provider <name>`

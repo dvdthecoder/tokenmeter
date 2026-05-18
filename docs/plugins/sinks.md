@@ -26,8 +26,35 @@ tokenmeter scaffold sink webhook
 |---|---|---|
 | `stdout` | ✅ Available | `sinks.stdout` |
 | `sqlite` | ✅ Available | `sinks.sqlite` |
-| `otel` | 🔨 v0.5 | `sinks.otel` |
-| `prometheus` | 🔨 v0.5 | `sinks.prometheus` |
+| `otel` | ✅ Available | `sinks.otel` |
+| `prometheus` | 🔨 v0.9 | `sinks.prometheus` |
+
+## OTEL sink config
+
+The OTEL sink pushes metrics via OTLP gRPC to a central collector (Grafana Cloud, Prometheus remote-write, OTel Collector, etc.).
+
+```yaml
+sinks:
+  otel:
+    enabled: true
+    options:
+      endpoint: "localhost:4317"   # gRPC endpoint (host:port)
+      insecure: true               # false = TLS
+      timeout_ms: 5000             # export timeout
+      interval_s: 30               # push interval
+```
+
+Metrics emitted per event (attributes: `model`, `provider`, `user`):
+
+| Metric | Type | Unit |
+|---|---|---|
+| `llm.tokens.input` | Counter | `{token}` |
+| `llm.tokens.output` | Counter | `{token}` |
+| `llm.tokens.cached` | Counter | `{token}` |
+| `llm.cost.usd` | Counter | `USD` |
+| `llm.latency.ms` | Histogram | `ms` |
+
+`llm.tokens.cached` is only recorded when non-zero (avoids polluting dashboards with zero-series). `Close()` flushes with a 10 s timeout — critical for ephemeral/sidecar deployments.
 
 ## Writing a new sink
 
