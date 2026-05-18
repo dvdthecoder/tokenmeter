@@ -115,6 +115,50 @@ func TestPurge(t *testing.T) {
 	}
 }
 
+func TestPurgeUser(t *testing.T) {
+	db := openMemDB(t)
+
+	alice := testEvent
+	alice.RequestID = "req-alice"
+	alice.Username = "alice"
+
+	bob := testEvent
+	bob.RequestID = "req-bob"
+	bob.Username = "bob"
+
+	_ = db.Insert(alice)
+	_ = db.Insert(bob)
+
+	n, err := db.PurgeUser("alice")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 1 {
+		t.Errorf("expected 1 purged row, got %d", n)
+	}
+
+	rows, _ := db.Query(storage.QueryOpts{})
+	if len(rows) != 1 {
+		t.Errorf("expected 1 remaining row (bob), got %d", len(rows))
+	}
+	if rows[0].Username != "bob" {
+		t.Errorf("expected bob to remain, got %q", rows[0].Username)
+	}
+}
+
+func TestPurgeUserNotFound(t *testing.T) {
+	db := openMemDB(t)
+	_ = db.Insert(testEvent)
+
+	n, err := db.PurgeUser("nobody")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n != 0 {
+		t.Errorf("expected 0 rows deleted for unknown user, got %d", n)
+	}
+}
+
 func TestWriteTable(t *testing.T) {
 	db := openMemDB(t)
 	_ = db.Insert(testEvent)

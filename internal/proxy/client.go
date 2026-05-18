@@ -75,8 +75,8 @@ func versionFromUA(ua, prefix string) string {
 	return rest[:end]
 }
 
-// systemUsername returns the OS user running the process, or the
-// TOKENMETER_USER env var if set.
+// systemUsername returns the OS user running the process.
+// Resolution order: TOKENMETER_USER env var → USER → USERNAME (Windows) → hostname.
 func systemUsername() string {
 	if u := os.Getenv("TOKENMETER_USER"); u != "" {
 		return u
@@ -84,5 +84,12 @@ func systemUsername() string {
 	if u := os.Getenv("USER"); u != "" {
 		return u
 	}
-	return os.Getenv("USERNAME") // Windows
+	if u := os.Getenv("USERNAME"); u != "" {
+		return u
+	}
+	// Last resort: machine hostname — still identifies the source.
+	if h, err := os.Hostname(); err == nil && h != "" {
+		return h
+	}
+	return "unknown"
 }

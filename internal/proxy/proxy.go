@@ -194,6 +194,9 @@ func (p *Proxy) errorHandler(w http.ResponseWriter, r *http.Request, err error) 
 // emit runs the middleware chain then fans the event out to all active sinks.
 func (p *Proxy) emit(ctx context.Context, event providers.UsageEvent) {
 	event.ServiceID = hashServiceID(event.ServiceID, p.cfg.Privacy.HashServiceID)
+	if p.cfg.Privacy.HashUser && event.Username != "" {
+		event.Username = hashUser(event.Username, p.cfg.Privacy.OrgSalt)
+	}
 
 	slog.Debug("emitting event", "provider", event.Provider, "model", event.Model)
 

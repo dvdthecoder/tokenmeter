@@ -33,6 +33,8 @@ type MiddlewareConfig struct {
 type PrivacyConfig struct {
 	DataMinimisation bool   `yaml:"data_minimisation"`
 	HashServiceID    bool   `yaml:"hash_service_id"` // default: true
+	HashUser         bool   `yaml:"hash_user"`        // pseudonymise username before storage
+	OrgSalt          string `yaml:"org_salt"`         // shared salt for user hashing; prefer TOKENMETER_ORG_SALT
 	EncryptAtRest    bool   `yaml:"encrypt_at_rest"`
 	EncryptionKey    string `yaml:"encryption_key"` // prefer TOKENMETER_ENCRYPTION_KEY env var
 }
@@ -81,4 +83,7 @@ func applyDefaults(cfg *Config) {
 		cfg.Retention.Days = 90
 	}
 	cfg.Privacy.HashServiceID = true // always default to hashing
+	if salt := os.Getenv("TOKENMETER_ORG_SALT"); salt != "" {
+		cfg.Privacy.OrgSalt = salt
+	}
 }

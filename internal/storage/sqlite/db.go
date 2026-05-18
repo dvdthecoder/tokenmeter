@@ -172,6 +172,15 @@ func (d *DB) Purge(before time.Time) (int64, error) {
 	return res.RowsAffected()
 }
 
+// PurgeUser deletes all events for a specific username. Returns number of rows deleted.
+func (d *DB) PurgeUser(username string) (int64, error) {
+	res, err := d.db.Exec(`DELETE FROM events WHERE username = ?`, username)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}
+
 // AutoPurge deletes events older than retentionDays. No-op if retentionDays == 0.
 func (d *DB) AutoPurge(retentionDays int) (int64, error) {
 	if retentionDays == 0 {

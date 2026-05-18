@@ -411,6 +411,17 @@ func cmdPurge() *cobra.Command {
 
 			beforeStr, _ := cmd.Flags().GetString("before")
 			retentionDays, _ := cmd.Flags().GetInt("retention-days")
+			user, _ := cmd.Flags().GetString("user")
+
+			// Per-user purge (GDPR right-to-erasure).
+			if user != "" {
+				n, err := db.PurgeUser(user)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(os.Stdout, "Deleted %d event(s) for user %q\n", n, user)
+				return nil
+			}
 
 			var before time.Time
 			switch {
@@ -425,7 +436,7 @@ func cmdPurge() *cobra.Command {
 			case retentionDays > 0:
 				before = time.Now().AddDate(0, 0, -retentionDays)
 			default:
-				return fmt.Errorf("specify --before <date> or --retention-days <n>")
+				return fmt.Errorf("specify --before <date>, --retention-days <n>, or --user <name>")
 			}
 
 			n, err := db.Purge(before)
@@ -438,6 +449,7 @@ func cmdPurge() *cobra.Command {
 	}
 	cmd.Flags().String("before", "", "Delete events before this date (YYYY-MM-DD or RFC3339)")
 	cmd.Flags().Int("retention-days", 0, "Delete events older than N days")
+	cmd.Flags().String("user", "", "Delete all events for this user (GDPR right-to-erasure)")
 	cmd.Flags().String("db", "", "Path to SQLite database")
 	return cmd
 }
