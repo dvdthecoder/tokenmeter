@@ -1,0 +1,65 @@
+# tokenmeter central collector stack
+#
+# Receives OTLP gRPC pushes from edge tokenmeter instances (port 4317),
+# stores metrics in Prometheus, and exposes a Grafana dashboard.
+#
+# Usage:
+#   docker compose up -d
+#   open http://localhost:3000   (admin / tokenmeter)
+#
+# Point each edge tokenmeter at this host:
+#   sinks.otel.options.endpoint: "<this-host>:4317"
+#   sinks.otel.options.insecure: true
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.119.0
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317"    # OTLP gRPC  ← tokenmeter pushes here
+      - "4318:4318"    # OTLP HTTP  (optional, for non-gRPC clients)
+    restart: unless-stopped
+    networks:
+      - collector
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=90d"
+      - "--web.enable-remote-write-receiver"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - collector
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=tokenmeter
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/tokenmeter.json
+    restart: unless-stopped
+    networks:
+      - collector
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  collector:

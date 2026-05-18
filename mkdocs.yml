@@ -52,6 +52,7 @@ nav:
     - Installation: getting-started/installation.md
     - Quickstart: getting-started/quickstart.md
     - Configuration: getting-started/configuration.md
+    - Central Collector: getting-started/collector.md
   - Supported Tools:
     - Claude Code: tools/claude-code.md
     - OpenCode: tools/opencode.md

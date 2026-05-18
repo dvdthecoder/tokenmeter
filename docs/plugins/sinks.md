@@ -31,6 +31,11 @@ tokenmeter scaffold sink webhook
 
 ## OTEL sink config
 
+!!! tip "Setting up a central collector"
+    See [Central Collector Setup](../getting-started/collector.md) for Docker Compose, Grafana Cloud, Datadog, and other options.
+
+
+
 The OTEL sink pushes metrics via OTLP gRPC to a central collector (Grafana Cloud, Prometheus remote-write, OTel Collector, etc.).
 
 ```yaml
