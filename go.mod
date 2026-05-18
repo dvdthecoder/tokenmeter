@@ -1,4 +1,4 @@
-module github.com/yourorg/tokenmeter
+module github.com/dvdthecoder/tokenmeter
 
 go 1.25.0
 
