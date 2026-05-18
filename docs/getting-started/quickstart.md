@@ -2,6 +2,9 @@
 
 This gets you from zero to your first captured token event in under 5 minutes.
 
+!!! tip "Building from source?"
+    If you're developing on tokenmeter itself, use `make dev-up` instead — it builds the binary, starts the edge proxy, and brings up the full collector stack in one command. See [Local dev setup](collector.md#local-end-to-end-dev-setup).
+
 ## 1. Install and start
 
 ```sh

@@ -19,16 +19,52 @@ Developer C (mac)                └──────────────�
 
 SQLite stays at the edge (local, private). Metrics (counts + cost, no content) push to the collector.
 
+## Local end-to-end dev setup
+
+The fastest way to test the full pipeline locally (no live API key required for the plumbing):
+
+```sh
+# 1. Start collector stack + edge proxy
+make dev-up
+
+# 2. In a new shell — route any LLM tool through the proxy
+export ANTHROPIC_BASE_URL=http://127.0.0.1:4191
+export OPENAI_BASE_URL=http://127.0.0.1:4191
+
+# 3. Make API calls normally — tokenmeter intercepts them transparently
+
+# 4. Inspect captured events
+make dev-query          # table view in terminal
+make collector-open     # Grafana dashboard (metrics appear within ~10 s)
+
+# 5. Tear down
+make dev-down
+```
+
+Individual targets for when you want more control:
+
+| Command | What it does |
+|---|---|
+| `make dev-proxy` | Build + start edge proxy in background |
+| `make dev-proxy-stop` | Stop proxy (also clears stale process on :4191) |
+| `make dev-logs` | Tail proxy log — shows every request + UsageEvent |
+| `make dev-status` | Proxy PID + Docker container health |
+| `make collector-logs` | Tail OTel Collector — shows every metric as it arrives |
+| `make smoke` | CI-safe: build → start → `/health` check → stop |
+
+Config used by `dev-proxy`: **`config.dev.yaml`** (SQLite to `/tmp/tokenmeter-dev.db`, OTEL to `localhost:4317`, 10 s flush interval).
+
+---
+
 ## Option 1 — Docker Compose (recommended for self-hosted)
 
 The fastest way to get a working stack: OTel Collector + Prometheus + Grafana, all pre-configured.
 
 ```sh
-cd deploy/collector
-docker compose up -d
+make collector-up
 ```
 
-Open **http://localhost:3000** — login `admin` / `tokenmeter`.
+Open **http://localhost:3000** — login `admin` / `tokenmeter` — or run `make collector-open` to launch it automatically.
 
 The tokenmeter dashboard loads automatically with:
 

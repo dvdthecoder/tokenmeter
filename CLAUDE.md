@@ -14,11 +14,29 @@ Deployment targets: **sidecar** (loopback-only, per-agent) and **shared** (multi
 make build          # compile to bin/tokenmeter
 make test           # go test ./...
 make test-race      # go test -race ./...
-make lint           # golangci-lint run ./...
+make lint           # go vet + go build
 make release        # cross-compile all platform binaries to dist/
+make smoke          # integration smoke test: build → start → /health → stop
 
 go test ./plugins/providers/... -run TestAnthropicParse   # single test
 go test ./internal/proxy/... -v                            # package with verbose output
+```
+
+Local dev environment (edge proxy + collector stack):
+```bash
+make dev-up              # start everything: OTel Collector + Prometheus + Grafana + edge proxy
+make dev-down            # stop everything
+
+make collector-up        # Docker: OTel Collector + Prometheus + Grafana only
+make collector-down      # stop collector containers
+make collector-logs      # tail OTel Collector output (see metrics arrive in real time)
+make collector-open      # open Grafana at localhost:3000 (admin / tokenmeter)
+
+make dev-proxy           # build + start edge proxy in background (uses config.dev.yaml)
+make dev-proxy-stop      # stop proxy + clear stale process on :4191
+make dev-logs            # tail /tmp/tokenmeter-dev.log
+make dev-query           # tokenmeter query --last 1h against dev SQLite
+make dev-status          # show proxy PID + Docker container status
 ```
 
 Runtime:
@@ -27,6 +45,7 @@ Runtime:
 ./bin/tokenmeter daemon                          # background daemon
 ./bin/tokenmeter install                         # daemon + auto-configure detected tools
 ./bin/tokenmeter install --backend claudecode    # specific backend only
+./bin/tokenmeter verify                          # health check + routing confirmation
 ./bin/tokenmeter status
 ./bin/tokenmeter query --last 24h --format table
 ./bin/tokenmeter purge --before 2024-01-01
