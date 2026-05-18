@@ -4,35 +4,39 @@ Claude Code CLI (`claude`) uses `ANTHROPIC_BASE_URL` to route API calls. tokenme
 
 ## Setup
 
-`tokenmeter install` handles everything automatically. To verify:
+`tokenmeter install` handles everything automatically:
+
+```sh
+tokenmeter install
+tokenmeter verify   # confirm routing
+```
+
+To verify manually:
 
 ```sh
 echo $ANTHROPIC_BASE_URL    # → http://127.0.0.1:4191
-claude "hello"              # → events appear in tokenmeter query
+claude "hello"
+tokenmeter query --last 5m
 ```
 
 ## In-tool commands (Claude Code skills)
 
-tokenmeter installs a set of skills into `~/.claude/skills/` that you can invoke from inside Claude Code:
+`tokenmeter install` copies three skill files into `~/.claude/skills/`:
 
 | Command | What it does |
 |---|---|
 | `/proxy-status` | Daemon health + last 5 events |
-| `/proxy-report` | Token and cost summary for the current session |
+| `/proxy-report` | Token and cost summary |
 | `/proxy-purge` | GDPR data deletion |
-| `/install-proxy` | Install or reinstall tokenmeter |
-| `/add-provider` | Scaffold a new provider plugin |
-| `/add-sink` | Scaffold a new sink plugin |
-| `/add-backend` | Scaffold a new backend adapter |
+
+These are available immediately inside any Claude Code session after install.
 
 ## What tokenmeter captures
 
 Claude Code sends a `User-Agent` header of the form `claude-cli/2.1.142 (external, sdk-cli)`. tokenmeter parses this to populate:
 
-- `ClientName`: `claude-code-cli` or `claude-code-app`
+- `ClientName`: `claude-code-cli`
 - `ClientVersion`: e.g. `2.1.142`
-
-The `(external, sdk-cli)` suffix indicates the auth mode — `external` means an API key is in use rather than a claude.ai subscription.
 
 ## Anthropic-specific fields captured
 
@@ -47,4 +51,4 @@ The `(external, sdk-cli)` suffix indicates the auth mode — `external` means an
 
 ## Health check
 
-Claude Code sends `HEAD /` before each request to check the proxy is alive. tokenmeter returns `200 OK` and suppresses the log noise for that path.
+Claude Code sends `HEAD /` before each request to verify the proxy is alive. tokenmeter returns `200 OK` and suppresses log noise for that path.

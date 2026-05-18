@@ -23,9 +23,10 @@ Claude Code / OpenCode / Aider / VS Code
 ```sh
 curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts/install.sh | sh
 tokenmeter install
+tokenmeter verify
 ```
 
-`install` detects your AI tools, registers the daemon as a system service, and patches your shell profile — one command, done.
+`install` detects your AI tools, registers the daemon as a system service, patches your shell profile, and configures each tool's settings. `verify` confirms everything is routing correctly.
 
 ---
 
@@ -53,14 +54,14 @@ Prompts and responses are **never stored**.
 
 | Tool | Hook | Status |
 |---|---|---|
-| Claude Code CLI | `ANTHROPIC_BASE_URL` | ✅ Supported |
-| OpenCode | `OPENAI_BASE_URL` | ✅ Supported |
-| Aider | `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` | ✅ Supported |
-| Codex CLI | `OPENAI_BASE_URL` | ✅ Supported |
-| Continue.dev (VS Code) | `OPENAI_BASE_URL` | ✅ Supported |
-| Cline (VS Code) | config file | ✅ Supported |
-| GitHub Copilot | hardcoded endpoint | 🔨 Planned (v0.8) |
-| Gemini CLI | native API | 🔨 Planned (v0.5) |
+| Claude Code CLI | `ANTHROPIC_BASE_URL` + skills | ✅ |
+| OpenCode | `OPENAI_BASE_URL` + `config.json` | ✅ |
+| Aider | `OPENAI_BASE_URL` / `ANTHROPIC_BASE_URL` | ✅ |
+| Codex CLI | `OPENAI_BASE_URL` | ✅ |
+| Continue.dev (VS Code) | `OPENAI_BASE_URL` | ✅ |
+| Cline (VS Code) | `settings.json` patch | ✅ |
+| Gemini CLI | native API | 🔨 v0.5 |
+| GitHub Copilot | hardcoded endpoint | 🔨 v0.8 |
 
 ---
 

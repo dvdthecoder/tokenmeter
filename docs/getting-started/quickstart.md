@@ -9,7 +9,22 @@ curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts
 tokenmeter install
 ```
 
-## 2. Open a new shell
+## 2. Verify routing
+
+```sh
+tokenmeter verify
+```
+
+```
+proxy:        OK   (127.0.0.1:4191)
+claudecode:   OK
+opencode:     OK
+vscode:       OK
+```
+
+Any `FAIL` entries mean that tool is not yet routing through the proxy — re-run `tokenmeter install --backend <name>` to fix it.
+
+## 3. Open a new shell
 
 The env vars are set in your RC file — you need a fresh shell for them to take effect.
 
@@ -18,7 +33,7 @@ echo $ANTHROPIC_BASE_URL   # → http://127.0.0.1:4191
 echo $OPENAI_BASE_URL      # → http://127.0.0.1:4191
 ```
 
-## 3. Use your AI tool normally
+## 4. Use your AI tool normally
 
 Run Claude Code, OpenCode, Aider, or any supported tool as you normally would. tokenmeter is transparent — the tool doesn't know it's being proxied.
 
@@ -26,7 +41,7 @@ Run Claude Code, OpenCode, Aider, or any supported tool as you normally would. t
 claude "what is 2+2"
 ```
 
-## 4. Query what was captured
+## 5. Query what was captured
 
 ```sh
 tokenmeter query --last 1h
@@ -39,7 +54,7 @@ TIME                  MODEL              CLIENT                USER          IN 
 TOTAL (1)                                                       3     12    30976     $0.009482
 ```
 
-## 5. Export or purge
+## 6. Export or purge
 
 ```sh
 # Export everything as CSV

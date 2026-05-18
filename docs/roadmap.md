@@ -9,11 +9,11 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 1 | — | Traffic flows, tokens captured | ✅ Done |
 | 2 | — | SQLite persistence + query CLI | ✅ Done |
 | 3 | — | Daemon + install | ✅ Done |
-| 4 | v0.4 | Backend integrations | 🔨 Next |
+| 4 | v0.4 | Backend integrations | ✅ Done |
 | 5 | v0.5 | OTEL + Prometheus + Gemini | Planned |
-| 6 | v0.6 | GDPR tooling + redaction middleware | Planned |
+| 6 | v0.6 | GDPR tooling + redaction | Planned |
 | 7 | v0.7 | Plugin scaffold + contribution tooling | Planned |
-| 8 | v0.8 | VS Code extension + live status bar | Planned |
+| 8 | v0.8 | VS Code extension | Planned |
 
 ---
 
@@ -45,20 +45,18 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 - `tokenmeter uninstall` — clean reversal of all install actions
 - Idempotent shell patching for zsh, bash, fish
 
----
-
-## 🔨 Iteration 4 — Backend integrations (v0.4)
+## ✅ Iteration 4 — Backend integrations (v0.4)
 
 Each AI tool gets an adapter that auto-detects and configures itself:
 
-- **Claude Code** — skill installation (`~/.claude/skills/`) + verify routing
-- **Codex CLI** — detect + verify
-- **OpenCode** — patch `~/.config/opencode/config.json`
-- **VS Code** — patch Continue.dev and Cline settings
+- **Claude Code** — skill files installed to `~/.claude/skills/` (`/proxy-status`, `/proxy-report`, `/proxy-purge`)
+- **Codex CLI** — detect + verify `OPENAI_BASE_URL`
+- **OpenCode** — patch `~/.config/opencode/config.json` with proxy `baseURL`, merges safely with existing user config
+- **VS Code (Cline)** — patch `settings.json` with `cline.apiProvider` + `cline.openAiBaseUrl`
 - `tokenmeter install --backend <name>` — target a specific tool
-- `tokenmeter verify` — confirm each detected tool is routing through the proxy
+- `tokenmeter verify` — HTTP health check + routing confirmation for all detected tools
 
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-4)
+---
 
 ## Planned — Iteration 5 — OTEL + Prometheus + Gemini (v0.5)
 
@@ -74,9 +72,8 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 ## Planned — Iteration 6 — GDPR tooling + redaction (v0.6)
 
 - Redaction middleware (PII regex, configurable opt-in)
-- SQLite encryption at rest
+- SQLite encryption at rest (`TOKENMETER_ENCRYPTION_KEY`)
 - `privacy.data_minimisation` mode (strips attribution fields)
-- `docs/privacy.md` hardened with audit trail guidance
 - Amazon Bedrock provider plugin
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-6)
@@ -84,9 +81,8 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 ## Planned — Iteration 7 — Plugin contribution tooling (v0.7)
 
 - `tokenmeter scaffold` fully implemented for all three plugin types
-- Webhook sink
-- Cost-alert middleware (configurable USD threshold → webhook/log)
-- `docs/plugins/` guide complete with worked examples
+- Webhook sink — POST `UsageEvent` JSON to any endpoint
+- Cost-alert middleware — configurable USD threshold → log + webhook
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-7)
 
@@ -96,8 +92,8 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - Status bar: live session token count + cost
 - Webview dashboard: usage by model + cost over time
 - Auto-starts daemon if not running
-- GitHub Copilot interception (VS Code HTTP proxy + MITM cert approach)
-- Marketplace listing
+- Cursor + Windsurf backend adapters
+- GitHub Copilot interception investigation
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-8)
 

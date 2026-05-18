@@ -61,17 +61,40 @@ TIME                  MODEL              CLIENT                USER     IN    OU
 
 ## `tokenmeter install`
 
-Install the daemon as a system service and configure detected AI tools.
+Install the daemon as a system service and configure all detected AI tools.
 
 ```sh
 tokenmeter install
-tokenmeter install --backend claudecode   # specific tool only (v0.4+)
+tokenmeter install --backend claudecode   # specific tool only
 ```
 
 What it does:
 1. Writes default config to `~/.config/tokenmeter/config.yaml` (if not present)
-2. Installs and starts the system service (launchd / systemd)
-3. Patches shell profile with `ANTHROPIC_BASE_URL` and `OPENAI_BASE_URL`
+2. Installs and starts the system service (launchd on macOS, systemd user unit on Linux)
+3. Patches your shell profile with `ANTHROPIC_BASE_URL` and `OPENAI_BASE_URL`
+4. Runs `Install()` on every detected AI tool backend (Claude Code, Codex, OpenCode, VS Code)
+
+| Flag | Description |
+|---|---|
+| `--backend` | Configure only one tool: `claudecode`, `codex`, `opencode`, `vscode` |
+
+---
+
+## `tokenmeter verify`
+
+Check that the proxy is running and each detected AI tool is routing through it.
+
+```sh
+tokenmeter verify
+```
+
+```
+proxy:        OK   (127.0.0.1:4191)
+claudecode:   OK
+opencode:     FAIL — proxy not detected in OPENAI_BASE_URL or ~/.config/opencode/config.json
+```
+
+Run `tokenmeter install` to fix any FAIL entries.
 
 ---
 
@@ -146,12 +169,10 @@ tokenmeter export --format csv > events.csv
 
 ## `tokenmeter scaffold`
 
-Generate a plugin stub.
+Generate a plugin stub. (Full implementation coming in v0.7.)
 
 ```sh
 tokenmeter scaffold provider gemini
 tokenmeter scaffold sink webhook
 tokenmeter scaffold backend cursor
 ```
-
-Creates the implementation file with the interface pre-filled.
