@@ -8,10 +8,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yourorg/tokenmeter/internal/config"
-	storage "github.com/yourorg/tokenmeter/internal/storage/sqlite"
-	"github.com/yourorg/tokenmeter/plugins/providers"
-	"github.com/yourorg/tokenmeter/plugins/sinks"
+	"github.com/dvdthecoder/tokenmeter/internal/config"
+	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
 )
 
 func init() {

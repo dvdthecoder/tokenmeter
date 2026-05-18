@@ -3,7 +3,7 @@
 ## One-line install (macOS / Linux)
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yourorg/tokenmeter/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts/install.sh | sh
 ```
 
 This downloads the right binary for your platform, places it in `/usr/local/bin`, then runs `tokenmeter install`.
@@ -12,22 +12,22 @@ This downloads the right binary for your platform, places it in `/usr/local/bin`
 
 ```sh
 # macOS arm64
-curl -fsSL https://github.com/yourorg/tokenmeter/releases/latest/download/tokenmeter-darwin-arm64 \
+curl -fsSL https://github.com/dvdthecoder/tokenmeter/releases/latest/download/tokenmeter-darwin-arm64 \
   -o /usr/local/bin/tokenmeter && chmod +x /usr/local/bin/tokenmeter
 
 # macOS amd64
-curl -fsSL https://github.com/yourorg/tokenmeter/releases/latest/download/tokenmeter-darwin-amd64 \
+curl -fsSL https://github.com/dvdthecoder/tokenmeter/releases/latest/download/tokenmeter-darwin-amd64 \
   -o /usr/local/bin/tokenmeter && chmod +x /usr/local/bin/tokenmeter
 
 # Linux amd64
-curl -fsSL https://github.com/yourorg/tokenmeter/releases/latest/download/tokenmeter-linux-amd64 \
+curl -fsSL https://github.com/dvdthecoder/tokenmeter/releases/latest/download/tokenmeter-linux-amd64 \
   -o /usr/local/bin/tokenmeter && chmod +x /usr/local/bin/tokenmeter
 ```
 
 ## Build from source
 
 ```sh
-git clone https://github.com/yourorg/tokenmeter
+git clone https://github.com/dvdthecoder/tokenmeter
 cd tokenmeter
 make build          # → bin/tokenmeter
 make install        # build + tokenmeter install

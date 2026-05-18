@@ -14,24 +14,24 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/yourorg/tokenmeter/internal/config"
-	"github.com/yourorg/tokenmeter/internal/daemon"
-	"github.com/yourorg/tokenmeter/internal/proxy"
-	storage "github.com/yourorg/tokenmeter/internal/storage/sqlite"
-	"github.com/yourorg/tokenmeter/plugins/sinks"
-	sqlitesink "github.com/yourorg/tokenmeter/plugins/sinks/sqlite"
+	"github.com/dvdthecoder/tokenmeter/internal/config"
+	"github.com/dvdthecoder/tokenmeter/internal/daemon"
+	"github.com/dvdthecoder/tokenmeter/internal/proxy"
+	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
+	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
+	sqlitesink "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 
 	// Blank imports register built-in plugins via init().
-	_ "github.com/yourorg/tokenmeter/plugins/providers/anthropic"
-	_ "github.com/yourorg/tokenmeter/plugins/providers/openai"
-	_ "github.com/yourorg/tokenmeter/plugins/sinks/sqlite"
-	_ "github.com/yourorg/tokenmeter/plugins/sinks/stdout"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/openai"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/stdout"
 	// Future iterations:
-	// _ "github.com/yourorg/tokenmeter/plugins/sinks/otel"
-	// _ "github.com/yourorg/tokenmeter/plugins/backends/claudecode"
-	// _ "github.com/yourorg/tokenmeter/plugins/backends/codex"
-	// _ "github.com/yourorg/tokenmeter/plugins/backends/opencode"
-	// _ "github.com/yourorg/tokenmeter/plugins/backends/vscode"
+	// _ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
+	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/claudecode"
+	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/codex"
+	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
+	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
 )
 
 // Version is set at build time via ldflags.

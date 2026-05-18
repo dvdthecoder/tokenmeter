@@ -1,8 +1,8 @@
 site_name: tokenmeter
 site_description: Thin, GDPR-compliant token usage meter for LLM APIs
-site_url: https://yourorg.github.io/tokenmeter
-repo_url: https://github.com/yourorg/tokenmeter
-repo_name: yourorg/tokenmeter
+site_url: https://dvdthecoder.github.io/tokenmeter
+repo_url: https://github.com/dvdthecoder/tokenmeter
+repo_name: dvdthecoder/tokenmeter
 edit_uri: edit/main/docs/
 
 theme:

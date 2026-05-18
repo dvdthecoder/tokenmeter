@@ -28,4 +28,4 @@ For local models, set `proxy.upstreams.openai` to your vLLM endpoint. Cost is re
 ## Notes
 
 - Aider is listed as experimental in the primary supported tools — the env-var hook works but client detection from the User-Agent is not yet validated
-- If you see `client=unknown` in query output, [open an issue](https://github.com/yourorg/tokenmeter/issues/new?template=bug_report.md) with the User-Agent header value
+- If you see `client=unknown` in query output, [open an issue](https://github.com/dvdthecoder/tokenmeter/issues/new?template=bug_report.md) with the User-Agent header value

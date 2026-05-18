@@ -15,7 +15,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/yourorg/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 	_ "modernc.org/sqlite"
 )
 

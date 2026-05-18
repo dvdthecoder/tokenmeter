@@ -6,7 +6,7 @@ package middleware
 import (
 	"context"
 
-	"github.com/yourorg/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 )
 
 // MiddlewarePlugin transforms or gates UsageEvents before they reach sinks.

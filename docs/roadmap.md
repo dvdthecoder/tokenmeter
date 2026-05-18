@@ -58,7 +58,7 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - `tokenmeter install --backend <name>` — target a specific tool
 - `tokenmeter verify` — confirm each detected tool is routing through the proxy
 
-[Open issues →](https://github.com/yourorg/tokenmeter/issues?q=label%3Aiteration-4)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-4)
 
 ## Planned — Iteration 5 — OTEL + Prometheus + Gemini (v0.5)
 
@@ -69,7 +69,7 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - **Gemini provider plugin** — native `generativelanguage.googleapis.com` wire format
 - Agent-container ephemeral flush (events emitted before sandbox teardown)
 
-[Open issues →](https://github.com/yourorg/tokenmeter/issues?q=label%3Aiteration-5)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-5)
 
 ## Planned — Iteration 6 — GDPR tooling + redaction (v0.6)
 
@@ -79,7 +79,7 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - `docs/privacy.md` hardened with audit trail guidance
 - Amazon Bedrock provider plugin
 
-[Open issues →](https://github.com/yourorg/tokenmeter/issues?q=label%3Aiteration-6)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-6)
 
 ## Planned — Iteration 7 — Plugin contribution tooling (v0.7)
 
@@ -88,7 +88,7 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - Cost-alert middleware (configurable USD threshold → webhook/log)
 - `docs/plugins/` guide complete with worked examples
 
-[Open issues →](https://github.com/yourorg/tokenmeter/issues?q=label%3Aiteration-7)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-7)
 
 ## Planned — Iteration 8 — VS Code extension (v0.8)
 
@@ -99,10 +99,10 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - GitHub Copilot interception (VS Code HTTP proxy + MITM cert approach)
 - Marketplace listing
 
-[Open issues →](https://github.com/yourorg/tokenmeter/issues?q=label%3Aiteration-8)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-8)
 
 ---
 
 ## Contributing
 
-See something missing? [Open an issue](https://github.com/yourorg/tokenmeter/issues/new/choose) or check [CONTRIBUTING.md](https://github.com/yourorg/tokenmeter/blob/main/CONTRIBUTING.md) to submit a plugin.
+See something missing? [Open an issue](https://github.com/dvdthecoder/tokenmeter/issues/new/choose) or check [CONTRIBUTING.md](https://github.com/dvdthecoder/tokenmeter/blob/main/CONTRIBUTING.md) to submit a plugin.

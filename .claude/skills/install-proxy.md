@@ -14,7 +14,7 @@ Installs the tokenmeter daemon on this machine and configures detected AI coding
 # Detect OS/arch and download
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-curl -fsSL "https://github.com/yourorg/tokenmeter/releases/latest/download/tokenmeter-${OS}-${ARCH}" \
+curl -fsSL "https://github.com/dvdthecoder/tokenmeter/releases/latest/download/tokenmeter-${OS}-${ARCH}" \
   -o /usr/local/bin/tokenmeter && chmod +x /usr/local/bin/tokenmeter
 
 # Install daemon + auto-detect and configure AI tools

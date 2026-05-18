@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Documentation
-    url: https://github.com/yourorg/tokenmeter#readme
+    url: https://github.com/dvdthecoder/tokenmeter#readme
     about: Read the docs before opening an issue
   - name: Discussions
-    url: https://github.com/yourorg/tokenmeter/discussions
+    url: https://github.com/dvdthecoder/tokenmeter/discussions
     about: Questions and ideas that don't need a bug report

@@ -5,7 +5,7 @@ This gets you from zero to your first captured token event in under 5 minutes.
 ## 1. Install and start
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yourorg/tokenmeter/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts/install.sh | sh
 tokenmeter install
 ```
 

@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yourorg/tokenmeter/internal/config"
-	"github.com/yourorg/tokenmeter/plugins/middleware"
-	"github.com/yourorg/tokenmeter/plugins/providers"
-	"github.com/yourorg/tokenmeter/plugins/sinks"
+	"github.com/dvdthecoder/tokenmeter/internal/config"
+	"github.com/dvdthecoder/tokenmeter/plugins/middleware"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
 )
 
 type contextKey int

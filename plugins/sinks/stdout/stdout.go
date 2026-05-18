@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/yourorg/tokenmeter/plugins/providers"
-	"github.com/yourorg/tokenmeter/plugins/sinks"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
 )
 
 func init() {

@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
-# curl -fsSL https://raw.githubusercontent.com/yourorg/tokenmeter/main/scripts/install.sh | sh
+# curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts/install.sh | sh
 set -e
 
-REPO="yourorg/tokenmeter"
+REPO="dvdthecoder/tokenmeter"
 BIN="tokenmeter"
 INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
 

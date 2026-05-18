@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	storage "github.com/yourorg/tokenmeter/internal/storage/sqlite"
-	"github.com/yourorg/tokenmeter/plugins/providers"
+	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 )
 
 func openMemDB(t *testing.T) *storage.DB {

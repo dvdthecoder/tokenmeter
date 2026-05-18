@@ -5,7 +5,7 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/yourorg/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 )
 
 // maxBufSize caps the line-assembly buffer. SSE data lines are never large;

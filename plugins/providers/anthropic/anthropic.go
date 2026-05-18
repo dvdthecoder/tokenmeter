@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yourorg/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 )
 
 func init() {

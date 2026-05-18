@@ -6,7 +6,7 @@ package sinks
 import (
 	"context"
 
-	"github.com/yourorg/tokenmeter/plugins/providers"
+	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 )
 
 // SinkPlugin receives UsageEvents for storage or forwarding.

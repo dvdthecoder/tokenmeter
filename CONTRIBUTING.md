@@ -6,7 +6,7 @@ There are four plugin surfaces. Each follows the same pattern:
 
 1. Implement the interface in `plugins/<type>/<name>/<name>.go`
 2. Call `<type>.Register(&Plugin{})` in an `init()` function
-3. Add a blank import `_ "github.com/yourorg/tokenmeter/plugins/<type>/<name>"` in `cmd/tokenmeter/main.go`
+3. Add a blank import `_ "github.com/dvdthecoder/tokenmeter/plugins/<type>/<name>"` in `cmd/tokenmeter/main.go`
 4. Write unit tests using fixture response bodies — no network calls
 5. Add yourself to `PLUGIN_REGISTRY.md`
 

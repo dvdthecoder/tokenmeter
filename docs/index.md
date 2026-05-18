@@ -21,7 +21,7 @@ Claude Code / OpenCode / Aider / VS Code
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yourorg/tokenmeter/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts/install.sh | sh
 tokenmeter install
 ```
 

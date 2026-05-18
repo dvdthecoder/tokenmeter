@@ -24,7 +24,7 @@ func init() {
 Then gets a blank import in `cmd/tokenmeter/main.go`:
 
 ```go
-import _ "github.com/yourorg/tokenmeter/plugins/providers/myprovider"
+import _ "github.com/dvdthecoder/tokenmeter/plugins/providers/myprovider"
 ```
 
 That's the entire integration contract. The core never imports plugins directly.

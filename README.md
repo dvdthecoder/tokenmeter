@@ -1,6 +1,6 @@
 # tokenmeter
 
-[![CI](https://github.com/yourorg/tokenmeter/actions/workflows/ci.yml/badge.svg)](https://github.com/yourorg/tokenmeter/actions/workflows/ci.yml)
+[![CI](https://github.com/dvdthecoder/tokenmeter/actions/workflows/ci.yml/badge.svg)](https://github.com/dvdthecoder/tokenmeter/actions/workflows/ci.yml)
 [![Go 1.23+](https://img.shields.io/badge/go-1.23+-00ADD8?logo=go)](https://go.dev)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
@@ -21,7 +21,7 @@ Claude Code / OpenCode / Aider / VS Code
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yourorg/tokenmeter/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dvdthecoder/tokenmeter/main/scripts/install.sh | sh
 tokenmeter install
 ```
 
@@ -68,7 +68,7 @@ tokenmeter scaffold sink webhook
 tokenmeter scaffold backend cursor
 ```
 
-See the [plugin guide →](https://yourorg.github.io/tokenmeter/plugins/overview/)
+See the [plugin guide →](https://dvdthecoder.github.io/tokenmeter/plugins/overview/)
 
 ## GDPR
 
@@ -78,20 +78,20 @@ See the [plugin guide →](https://yourorg.github.io/tokenmeter/plugins/overview
 - Auto-purge — configurable retention (default 90 days)
 - No telemetry — zero outbound calls except to your LLM API
 
-See [Privacy & GDPR docs →](https://yourorg.github.io/tokenmeter/privacy/)
+See [Privacy & GDPR docs →](https://dvdthecoder.github.io/tokenmeter/privacy/)
 
 ## Docs
 
-**[yourorg.github.io/tokenmeter](https://yourorg.github.io/tokenmeter)**
+**[dvdthecoder.github.io/tokenmeter](https://dvdthecoder.github.io/tokenmeter)**
 
-- [Getting started](https://yourorg.github.io/tokenmeter/getting-started/installation/)
-- [Configuration](https://yourorg.github.io/tokenmeter/getting-started/configuration/)
-- [CLI reference](https://yourorg.github.io/tokenmeter/cli/)
-- [Roadmap](https://yourorg.github.io/tokenmeter/roadmap/)
+- [Getting started](https://dvdthecoder.github.io/tokenmeter/getting-started/installation/)
+- [Configuration](https://dvdthecoder.github.io/tokenmeter/getting-started/configuration/)
+- [CLI reference](https://dvdthecoder.github.io/tokenmeter/cli/)
+- [Roadmap](https://dvdthecoder.github.io/tokenmeter/roadmap/)
 
 ## Contributing
 
-[CONTRIBUTING.md](CONTRIBUTING.md) · [Open an issue](https://github.com/yourorg/tokenmeter/issues/new/choose) · [Plugin guide](https://yourorg.github.io/tokenmeter/plugins/overview/)
+[CONTRIBUTING.md](CONTRIBUTING.md) · [Open an issue](https://github.com/dvdthecoder/tokenmeter/issues/new/choose) · [Plugin guide](https://dvdthecoder.github.io/tokenmeter/plugins/overview/)
 
 ## License
 
