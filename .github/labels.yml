@@ -1,0 +1,101 @@
+# Label definitions — synced automatically by .github/workflows/labels.yml
+# Format: name, color (hex without #), description
+
+# ── Type ──────────────────────────────────────────────────────────────────────
+- name: bug
+  color: d73a4a
+  description: Something is broken
+
+- name: enhancement
+  color: 0075ca
+  description: New feature or improvement
+
+- name: documentation
+  color: 0075ca
+  description: Docs gap or correction
+
+- name: question
+  color: d876e3
+  description: Further information requested
+
+- name: "good first issue"
+  color: 7057ff
+  description: Good for newcomers
+
+- name: "help wanted"
+  color: 008672
+  description: Extra attention needed
+
+- name: "breaking change"
+  color: e4e669
+  description: Breaks existing behaviour or config
+
+- name: gdpr
+  color: f9d0c4
+  description: Privacy or compliance concern
+
+- name: duplicate
+  color: cfd3d7
+  description: Already reported
+
+- name: wontfix
+  color: ffffff
+  description: Out of scope or by design
+
+# ── Component ─────────────────────────────────────────────────────────────────
+- name: "component: proxy"
+  color: bfd4f2
+  description: Core HTTP interception engine
+
+- name: "component: provider"
+  color: bfd4f2
+  description: LLM vendor plugin
+
+- name: "component: sink"
+  color: bfd4f2
+  description: Output / storage plugin
+
+- name: "component: backend"
+  color: bfd4f2
+  description: AI tool integration
+
+- name: "component: daemon"
+  color: bfd4f2
+  description: Process lifecycle and service install
+
+- name: "component: cli"
+  color: bfd4f2
+  description: CLI commands
+
+- name: "component: sqlite"
+  color: bfd4f2
+  description: Local SQLite storage
+
+- name: "component: otel"
+  color: bfd4f2
+  description: OpenTelemetry sink
+
+- name: "component: vscode-ext"
+  color: bfd4f2
+  description: VS Code extension
+
+# ── Iteration / Milestone ─────────────────────────────────────────────────────
+- name: iteration-4
+  color: e8e7ff
+  description: Backend integrations
+
+- name: iteration-5
+  color: e8e7ff
+  description: OTEL + Prometheus
+
+- name: iteration-6
+  color: e8e7ff
+  description: GDPR tooling + redaction
+
+- name: iteration-7
+  color: e8e7ff
+  description: Plugin scaffold + contribution tooling
+
+- name: iteration-8
+  color: e8e7ff
+  description: VS Code extension

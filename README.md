@@ -1,6 +1,22 @@
 # tokenmeter
 
-A thin, GDPR-compliant token usage meter for LLM APIs. Intercepts traffic from AI coding tools, extracts token usage metadata, and emits it via OpenTelemetry or local SQLite — without ever storing prompt content.
+[![CI](https://github.com/yourorg/tokenmeter/actions/workflows/ci.yml/badge.svg)](https://github.com/yourorg/tokenmeter/actions/workflows/ci.yml)
+[![Go 1.23+](https://img.shields.io/badge/go-1.23+-00ADD8?logo=go)](https://go.dev)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+
+Thin, GDPR-compliant token usage meter for LLM APIs. Sits between your AI coding tools and the model APIs — captures token counts, cost, and latency **without ever storing prompt or response content**.
+
+```
+Claude Code / OpenCode / Aider / VS Code
+        ↓
+  tokenmeter  (127.0.0.1:4191)
+        ↓
+  Anthropic / OpenAI / vLLM / Azure
+        ↓
+  UsageEvent — model · tokens · cost · latency
+        ↓
+  SQLite  ·  OTEL  ·  Prometheus
+```
 
 ## Install
 
@@ -9,48 +25,73 @@ curl -fsSL https://raw.githubusercontent.com/yourorg/tokenmeter/main/scripts/ins
 tokenmeter install
 ```
 
-`install` detects which AI tools you have (Claude Code, Codex CLI, OpenCode, VS Code extensions) and configures them automatically.
+Restart your shell. Done — every AI tool request is now captured.
 
-## Claude Code
-
-```
-/install-proxy    install and configure
-/proxy-status     daemon health + recent events
-/proxy-report     token usage and cost summary
-/proxy-purge      GDPR data deletion
-```
-
-## How it works
-
-```
-AI Tool → tokenmeter (127.0.0.1:4191) → LLM API
-                ↓
-         UsageEvent (metadata only)
-                ↓
-         SQLite / OTEL / Prometheus
-```
-
-Prompts and responses are never stored. Only: model, tokens in/out/cached, latency, estimated cost, timestamp.
-
-## Plugin contribution
-
-Add a provider, sink, middleware, or backend adapter:
+## Query
 
 ```sh
-tokenmeter scaffold provider <name>
-tokenmeter scaffold sink <name>
-tokenmeter scaffold backend <name>
+tokenmeter query --last 24h
+tokenmeter query --last 7d --format json
+tokenmeter export --format csv > usage.csv
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/plugin-guide.md](docs/plugin-guide.md).
+## Claude Code skills
+
+Inside Claude Code, use:
+
+```
+/proxy-status    daemon health + recent events
+/proxy-report    token and cost summary
+/proxy-purge     GDPR data deletion
+```
+
+## Tool coverage
+
+| Tool | Status |
+|---|---|
+| Claude Code CLI | ✅ |
+| OpenCode | ✅ |
+| Aider | ✅ |
+| Codex CLI | ✅ |
+| Continue.dev (VS Code) | ✅ |
+| Cline (VS Code) | ✅ |
+| GitHub Copilot | 🔨 v0.8 |
+| Gemini CLI | 🔨 v0.5 |
+
+## Plugin architecture
+
+Add support for any provider, sink, or AI tool — no core changes needed:
+
+```sh
+tokenmeter scaffold provider gemini
+tokenmeter scaffold sink webhook
+tokenmeter scaffold backend cursor
+```
+
+See the [plugin guide →](https://yourorg.github.io/tokenmeter/plugins/overview/)
 
 ## GDPR
 
-- **Local-first**: data stays on your machine
-- **Content-blind**: no prompts, no responses
-- **Retention**: auto-purge after configurable days (default 90)
-- **Erasure**: `tokenmeter purge --before <date>` or `--service-id <id>`
-- **No telemetry**: the binary makes zero outbound calls except to your LLM API and configured OTEL collector
+- Content-blind — `UsageEvent` contains only metadata
+- Local-first — SQLite on your machine, zero cloud dependencies
+- Right to erasure — `tokenmeter purge --before <date>`
+- Auto-purge — configurable retention (default 90 days)
+- No telemetry — zero outbound calls except to your LLM API
+
+See [Privacy & GDPR docs →](https://yourorg.github.io/tokenmeter/privacy/)
+
+## Docs
+
+**[yourorg.github.io/tokenmeter](https://yourorg.github.io/tokenmeter)**
+
+- [Getting started](https://yourorg.github.io/tokenmeter/getting-started/installation/)
+- [Configuration](https://yourorg.github.io/tokenmeter/getting-started/configuration/)
+- [CLI reference](https://yourorg.github.io/tokenmeter/cli/)
+- [Roadmap](https://yourorg.github.io/tokenmeter/roadmap/)
+
+## Contributing
+
+[CONTRIBUTING.md](CONTRIBUTING.md) · [Open an issue](https://github.com/yourorg/tokenmeter/issues/new/choose) · [Plugin guide](https://yourorg.github.io/tokenmeter/plugins/overview/)
 
 ## License
 

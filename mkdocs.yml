@@ -1,0 +1,68 @@
+site_name: tokenmeter
+site_description: Thin, GDPR-compliant token usage meter for LLM APIs
+site_url: https://yourorg.github.io/tokenmeter
+repo_url: https://github.com/yourorg/tokenmeter
+repo_name: yourorg/tokenmeter
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - search.highlight
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quickstart: getting-started/quickstart.md
+    - Configuration: getting-started/configuration.md
+  - Supported Tools:
+    - Claude Code: tools/claude-code.md
+    - OpenCode: tools/opencode.md
+    - Codex CLI: tools/codex.md
+    - Aider: tools/aider.md
+    - VS Code: tools/vscode.md
+  - Plugin Guide:
+    - Overview: plugins/overview.md
+    - Provider Plugins: plugins/providers.md
+    - Sink Plugins: plugins/sinks.md
+    - Backend Adapters: plugins/backends.md
+  - CLI Reference: cli.md
+  - Privacy & GDPR: privacy.md
+  - Roadmap: roadmap.md
