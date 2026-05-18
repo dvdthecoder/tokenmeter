@@ -24,7 +24,9 @@ middleware:
 
 privacy:
   data_minimisation: false   # true = drop service_id, keep counts only
-  hash_service_id: true
+  hash_service_id: true      # SHA-256 prefix the service_id before storage (default: true)
+  hash_user: false           # SHA-256(username + org_salt) before storage; set TOKENMETER_ORG_SALT
+  org_salt: ""               # shared team salt for user hashing; prefer TOKENMETER_ORG_SALT env var
   encrypt_at_rest: false
   encryption_key: ""         # set via TOKENMETER_ENCRYPTION_KEY env var
 

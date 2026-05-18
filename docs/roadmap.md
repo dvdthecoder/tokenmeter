@@ -12,7 +12,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 4 | v0.4 | Backend integrations | ✅ Done |
 | 5 | v0.5 | OTEL push sink | ✅ Done |
 | 6 | v0.6 | Gemini provider | ✅ Done |
-| 7 | v0.7 | Per-user attribution | Planned |
+| 7 | v0.7 | Per-user value | ✅ Done |
 | 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | Planned |
 | 9 | v0.9 | Local SLM insights (on-device, Ollama) | Planned |
 | 10 | v0.10 | VS Code extension + Cursor + Windsurf surface | Planned |
@@ -78,16 +78,12 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - Pricing table for 7 Gemini models; cached tokens billed at 25% of input price
 - Unknown models fall back to gemini-2.0-flash pricing
 
-## Planned — Iteration 7 — Per-user value (v0.7)
+## ✅ Iteration 7 — Per-user value (v0.7)
 
-Stamp the right user on every event so local analysis is meaningful per-developer — not a central identity system:
-
-- Reliable OS user resolution (`USER` / `USERPROFILE`) stamped at proxy ingestion
-- `tokenmeter query --user <name>` — filter by user
-- `tokenmeter purge --user <name>` — delete one user's rows (GDPR right-to-erasure)
-- Optional `privacy.hash_user: true` (default off) pre-wires pseudonymisation for when central collection is hardened in v0.11
-
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-7)
+- OS user resolution: `TOKENMETER_USER` → `USER` → `USERNAME` → hostname → `"unknown"`
+- `tokenmeter query --user <name>` — filter events by user
+- `tokenmeter purge --user <name>` — GDPR right-to-erasure per individual
+- Optional pseudonymisation: `privacy.hash_user: true` → `SHA-256(username + org_salt)`; salt via `TOKENMETER_ORG_SALT` env var; default off
 
 ## Planned — Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)
 

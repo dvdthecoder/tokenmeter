@@ -38,17 +38,41 @@ service_id: "alice-macbook" → stored as "3f4a9c2b1e7d8f0a"
 
 The original value is never stored. This makes it impossible to reverse-engineer the hostname from the database.
 
+## User attribution
+
+Every event is stamped with the OS user at proxy ingestion time. Resolution order:
+
+```
+TOKENMETER_USER env var → USER → USERNAME (Windows) → hostname → "unknown"
+```
+
+### Optional pseudonymisation
+
+When `privacy.hash_user: true`, the username is replaced with `SHA-256(username + org_salt)` before reaching any sink. The original name is never stored.
+
+```yaml
+privacy:
+  hash_user: true     # default: false
+  org_salt: ""        # set via TOKENMETER_ORG_SALT env var — shared across team machines
+```
+
+```sh
+export TOKENMETER_ORG_SALT=your-shared-team-secret
+```
+
+The `org_salt` prevents cross-org correlation of the same username. Without it, two orgs with a user named `alice` would produce the same hash.
+
 ## Right to erasure (GDPR Article 17)
 
 ```sh
-# Delete all events
-tokenmeter purge --retention-days 0
+# Per-user erasure — deletes all events for one person
+tokenmeter purge --user alice
 
-# Delete events before a specific date
+# Date-range deletion
 tokenmeter purge --before 2026-01-01
 
-# Delete and vacuum the SQLite file
-tokenmeter purge --retention-days 0
+# Rolling retention
+tokenmeter purge --retention-days 30
 ```
 
 Auto-purge runs at daemon startup based on `retention.days` in config (default: 90 days).
@@ -79,4 +103,4 @@ In `mode: shared`, multiple developers' events land in the same database. Recomm
 
 ## Data minimisation mode
 
-Coming in v0.6: `privacy.data_minimisation: true` drops `username`, `client_name`, and `client_version` from every event before it reaches any sink.
+Planned for v0.11 (central collection hardening): `privacy.data_minimisation: true` will drop `username`, `client_name`, and `client_version` from every event before it reaches any sink — useful when pushing to a shared central collector.

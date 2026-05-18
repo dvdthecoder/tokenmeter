@@ -138,12 +138,14 @@ tokenmeter query --format csv > report.csv
 GDPR-compliant event deletion.
 
 ```sh
-tokenmeter purge --before 2026-01-01
-tokenmeter purge --retention-days 30
+tokenmeter purge --before 2026-01-01       # date-range deletion
+tokenmeter purge --retention-days 30       # rolling window
+tokenmeter purge --user alice              # per-user erasure (GDPR Article 17)
 ```
 
 | Flag | Description |
 |---|---|
+| `--user` | Delete all events for a specific user (right-to-erasure) |
 | `--before` | Delete events before this date (YYYY-MM-DD or RFC3339) |
 | `--retention-days` | Delete events older than N days |
 | `--db` | Path to SQLite database |
