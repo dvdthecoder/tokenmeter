@@ -49,7 +49,10 @@ Runtime:
 ./bin/tokenmeter status
 ./bin/tokenmeter query --last 24h --format table
 ./bin/tokenmeter purge --before 2024-01-01
+./bin/tokenmeter purge --user alice              # GDPR right-to-erasure per user
 ./bin/tokenmeter export --format csv
+./bin/tokenmeter cert install                    # generate MITM CA + trust store install
+./bin/tokenmeter cert path                       # print CA cert path
 ./bin/tokenmeter scaffold provider <name>        # generate plugin stub
 ```
 
@@ -89,10 +92,21 @@ SSE responses are forwarded chunk-by-chunk to the caller. The interceptor buffer
 - The tokenmeter binary makes zero outbound connections except to the upstream model API and the configured OTEL collector.
 - Retention auto-purge runs at daemon startup.
 
+### HTTPS CONNECT / MITM (Copilot, Bedrock)
+
+When an AI tool sends an `HTTP CONNECT` tunnel request (used for HTTPS proxying), tokenmeter intercepts at the TLS layer. `internal/mitm/` holds the CA and CONNECT handler:
+
+- `ca.go` — generates an ECDSA CA on first run (`~/.local/share/tokenmeter/ca.{key,crt}`), signs per-host certs on demand (1-year, cached in memory)
+- `connect.go` — hijacks the connection, negotiates TLS using the signed cert, then feeds decrypted HTTP/1.1 requests back through the normal proxy pipeline
+
+Install the CA into the system trust store with `tokenmeter cert install`. For VS Code, `tokenmeter install` also patches `http.proxy` and `http.proxyStrictSSL: false` into `settings.json`.
+
 ### Built-in providers
 
 - `plugins/providers/anthropic/` — parses Anthropic SSE (`message_delta`, `message_stop`) and REST responses
 - `plugins/providers/openai/` — parses OpenAI streaming and non-streaming `usage` fields; also covers OpenAI-compatible APIs (OpenCode, LiteLLM, Ollama)
+- `plugins/providers/copilot/` — detects `api.githubcopilot.com`; delegates parsing to openai plugin; cost is always 0 (subscription)
+- `plugins/providers/bedrock/` — detects `*.bedrock.amazonaws.com`; parses Converse API and InvokeModelWithResponseStream metadata events
 
 ### Built-in sinks
 

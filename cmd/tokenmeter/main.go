@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strconv"
 	"strings"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/dvdthecoder/tokenmeter/internal/config"
 	"github.com/dvdthecoder/tokenmeter/internal/daemon"
+	"github.com/dvdthecoder/tokenmeter/internal/mitm"
 	"github.com/dvdthecoder/tokenmeter/internal/proxy"
 	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
 	"github.com/dvdthecoder/tokenmeter/plugins/backends"
@@ -28,6 +31,8 @@ import (
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/bedrock"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/copilot"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/gemini"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/openai"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
@@ -57,6 +62,7 @@ func main() {
 		cmdPurge(),
 		cmdExport(),
 		cmdScaffold(),
+		cmdCert(),
 	)
 
 	if err := root.Execute(); err != nil {
@@ -121,9 +127,20 @@ func cmdStart() *cobra.Command {
 				fmt.Fprintln(w, "ok")
 			})
 			mux.Handle("/", p)
+
+			// Wrap with MITM handler so CONNECT tunnels (Copilot, Bedrock) are intercepted.
+			var handler http.Handler = mux
+			ca, err := mitm.LoadOrCreate(dataDir())
+			if err != nil {
+				slog.Warn("mitm CA unavailable — CONNECT tunnels will be transparent", "err", err)
+			} else {
+				handler = &mitm.Handler{CA: ca, Next: mux}
+				slog.Info("mitm CA ready", "cert", mitm.CertPath(dataDir()))
+			}
+
 			srv := &http.Server{
 				Addr:    cfg.Proxy.Listen,
-				Handler: mux,
+				Handler: handler,
 				// Generous read timeout: SSE streams can be very long.
 				// WriteTimeout deliberately unset — would cut streaming responses.
 				ReadHeaderTimeout: 30 * time.Second,
@@ -520,6 +537,97 @@ func parseDuration(s string) (time.Duration, error) {
 		return time.Duration(n) * 24 * time.Hour, nil
 	}
 	return time.ParseDuration(s)
+}
+
+func cmdCert() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "cert",
+		Short: "Manage the local MITM CA certificate (required for Copilot interception)",
+	}
+	cmd.AddCommand(cmdCertInstall(), cmdCertPath())
+	return cmd
+}
+
+func cmdCertInstall() *cobra.Command {
+	return &cobra.Command{
+		Use:   "install",
+		Short: "Generate CA cert and install it in the system trust store",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ca, err := mitm.LoadOrCreate(dataDir())
+			if err != nil {
+				return fmt.Errorf("generate CA: %w", err)
+			}
+			certPath := mitm.CertPath(dataDir())
+			fmt.Fprintf(os.Stdout, "CA certificate: %s\n\n", certPath)
+
+			// Platform-specific trust store install.
+			switch {
+			case fileExists("/usr/bin/security"): // macOS
+				fmt.Fprintln(os.Stdout, "Installing to macOS system keychain (may prompt for password)...")
+				return runCmd("security", "add-trusted-cert", "-d", "-r", "trustRoot",
+					"-k", "/Library/Keychains/System.keychain", certPath)
+			case fileExists("/usr/bin/update-ca-certificates"): // Debian/Ubuntu
+				dest := "/usr/local/share/ca-certificates/tokenmeter.crt"
+				if err := copyFile(certPath, dest); err != nil {
+					return fmt.Errorf("copy cert: %w", err)
+				}
+				return runCmd("update-ca-certificates")
+			case fileExists("/usr/bin/trust"): // Fedora/Arch
+				return runCmd("trust", "anchor", "--store", certPath)
+			default:
+				fmt.Fprintf(os.Stdout, "Automatic install not supported on this platform.\n")
+				fmt.Fprintf(os.Stdout, "Manually trust: %s\n", certPath)
+				fmt.Fprintf(os.Stdout, "\nFor VS Code: add to settings.json:\n")
+				fmt.Fprintf(os.Stdout, `  "http.proxy": "http://127.0.0.1:4191",`+"\n")
+				fmt.Fprintf(os.Stdout, `  "http.proxyStrictSSL": false`+"\n")
+			}
+			_ = ca
+			return nil
+		},
+	}
+}
+
+func cmdCertPath() *cobra.Command {
+	return &cobra.Command{
+		Use:   "path",
+		Short: "Print the path to the CA certificate",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(mitm.CertPath(dataDir()))
+		},
+	}
+}
+
+// dataDir returns the platform data directory for tokenmeter state files.
+func dataDir() string {
+	home, _ := os.UserHomeDir()
+	return home + "/.local/share/tokenmeter"
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+	_, err = io.Copy(out, in)
+	return err
+}
+
+func runCmd(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 // errNotYet returns a clear error for commands not yet implemented.

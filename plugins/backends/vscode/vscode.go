@@ -46,6 +46,9 @@ func (a *Adapter) Install(proxyAddr string) error {
 	baseURL := "http://" + proxyAddr + "/v1"
 	settings["cline.apiProvider"] = "openai-compatible"
 	settings["cline.openAiBaseUrl"] = baseURL
+	// Route Copilot (and all HTTPS traffic) through tokenmeter's MITM proxy.
+	settings["http.proxy"] = "http://" + proxyAddr
+	settings["http.proxyStrictSSL"] = false
 
 	data, err := json.MarshalIndent(settings, "", "  ")
 	if err != nil {
@@ -67,6 +70,8 @@ func (a *Adapter) Uninstall() error {
 	}
 	delete(settings, "cline.apiProvider")
 	delete(settings, "cline.openAiBaseUrl")
+	delete(settings, "http.proxy")
+	delete(settings, "http.proxyStrictSSL")
 	out, err := json.MarshalIndent(settings, "", "  ")
 	if err != nil {
 		return err

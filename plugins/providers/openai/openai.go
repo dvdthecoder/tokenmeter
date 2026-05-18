@@ -23,11 +23,16 @@ type Plugin struct{}
 func (p *Plugin) Name() string { return "openai" }
 
 func (p *Plugin) Detect(req *http.Request) bool {
+	// Providers with dedicated plugins take precedence.
+	if strings.Contains(req.Host, "githubcopilot.com") ||
+		strings.Contains(req.Host, "amazonaws.com") {
+		return false
+	}
 	// Explicit OpenAI host.
 	if strings.Contains(req.Host, "openai.com") {
 		return true
 	}
-	// OpenAI-compatible: Authorization: Bearer ... + /v1/chat/completions path.
+	// OpenAI-compatible: Authorization: Bearer ... + /chat/completions path.
 	return strings.Contains(req.URL.Path, "/chat/completions") &&
 		strings.HasPrefix(req.Header.Get("Authorization"), "Bearer ")
 }
