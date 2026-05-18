@@ -18,20 +18,21 @@ import (
 	"github.com/dvdthecoder/tokenmeter/internal/daemon"
 	"github.com/dvdthecoder/tokenmeter/internal/proxy"
 	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
+	"github.com/dvdthecoder/tokenmeter/plugins/backends"
 	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
 	sqlitesink "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 
 	// Blank imports register built-in plugins via init().
+	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/claudecode"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/codex"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/openai"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/stdout"
 	// Future iterations:
 	// _ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
-	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/claudecode"
-	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/codex"
-	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
-	// _ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
 )
 
 // Version is set at build time via ldflags.
@@ -51,6 +52,7 @@ func main() {
 		cmdStatus(),
 		cmdInstall(),
 		cmdUninstall(),
+		cmdVerify(),
 		cmdQuery(),
 		cmdPurge(),
 		cmdExport(),
@@ -230,6 +232,7 @@ func cmdInstall() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("resolve binary path: %w", err)
 			}
+			onlyBackend, _ := cmd.Flags().GetString("backend")
 
 			// 1. Write default config (no-op if already exists).
 			cfgPath, err := daemon.WriteDefaultConfig()
@@ -253,13 +256,66 @@ func cmdInstall() *cobra.Command {
 				fmt.Println("         → restart your shell or run: source", rcFile)
 			}
 
+			// 4. Configure detected AI tool backends.
+			proxyAddr := config.Default().Proxy.Listen
+			for _, b := range backends.All() {
+				if onlyBackend != "" && b.Name() != onlyBackend {
+					continue
+				}
+				if !b.Detect() {
+					continue
+				}
+				if err := b.Install(proxyAddr); err != nil {
+					fmt.Printf("warning: %s backend install: %v\n", b.Name(), err)
+				} else {
+					fmt.Printf("backend: %-12s configured\n", b.Name())
+				}
+			}
+
 			fmt.Printf("logs:    %s\n", daemon.LogPath())
-			fmt.Println("\ntokenmeter is running. Use 'tokenmeter status' to verify.")
+			fmt.Println("\ntokenmeter is running. Run 'tokenmeter verify' to confirm routing.")
 			return nil
 		},
 	}
-	cmd.Flags().String("backend", "", "Configure only a specific backend (claudecode|codex|opencode|vscode) — coming in Iteration 4")
+	cmd.Flags().String("backend", "", "Configure only a specific backend (claudecode|codex|opencode|vscode)")
 	return cmd
+}
+
+func cmdVerify() *cobra.Command {
+	return &cobra.Command{
+		Use:   "verify",
+		Short: "Verify proxy routing for installed AI tools",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			proxyAddr := config.Default().Proxy.Listen
+
+			// 1. Check proxy health.
+			resp, err := http.Get("http://" + proxyAddr + "/")
+			if err != nil {
+				fmt.Printf("proxy:        FAIL — not reachable at %s (%v)\n", proxyAddr, err)
+			} else {
+				resp.Body.Close()
+				fmt.Printf("proxy:        OK   (%s)\n", proxyAddr)
+			}
+
+			// 2. Check each detected backend.
+			found := false
+			for _, b := range backends.All() {
+				if !b.Detect() {
+					continue
+				}
+				found = true
+				if verr := b.Verify(proxyAddr); verr != nil {
+					fmt.Printf("%-14s FAIL — %v\n", b.Name()+":", verr)
+				} else {
+					fmt.Printf("%-14s OK\n", b.Name()+":")
+				}
+			}
+			if !found {
+				fmt.Println("no AI tool backends detected on this machine")
+			}
+			return nil
+		},
+	}
 }
 
 func cmdUninstall() *cobra.Command {
