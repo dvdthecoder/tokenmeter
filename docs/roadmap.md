@@ -13,9 +13,11 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 5 | v0.5 | OTEL push sink | ✅ Done |
 | 6 | v0.6 | Gemini provider | ✅ Done |
 | 7 | v0.7 | Per-user attribution | Planned |
-| 8 | v0.8 | GDPR tooling + redaction | Planned |
-| 9 | v0.9 | Plugin scaffold + webhook + cost alerts | Planned |
-| 10 | v0.10 | VS Code extension | Planned |
+| 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | Planned |
+| 9 | v0.9 | GDPR tooling + redaction | Planned |
+| 10 | v0.10 | Plugin scaffold + webhook + cost alerts | Planned |
+| 11 | v0.11 | Local SLM insights (privacy-first, on-device) | Planned |
+| 12 | v0.12 | VS Code extension + Cursor + Windsurf | Planned |
 
 ---
 
@@ -86,34 +88,55 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-7)
 
-## Planned — Iteration 8 — GDPR tooling + redaction (v0.8)
+## Planned — Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)
+
+Enterprise model coverage — the two largest sources of LLM traffic not yet captured:
+
+- **GitHub Copilot** — intercept investigation (env var spike → VS Code extension wrapper if needed); wire format parser for `api.githubcopilot.com`
+- **AWS Bedrock** — Converse API provider plugin (`bedrock-runtime.<region>.amazonaws.com`); SigV4 transparent pass-through; cost table for Claude/Titan/Llama/Mistral on Bedrock
+- `tokenmeter verify` updated to show Copilot routing status
+
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-8)
+
+## Planned — Iteration 9 — GDPR tooling + redaction (v0.9)
 
 - Redaction middleware (PII regex, configurable opt-in)
 - SQLite encryption at rest (`TOKENMETER_ENCRYPTION_KEY`)
 - `privacy.data_minimisation` mode (strips attribution fields)
-- Amazon Bedrock provider plugin
 
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-8)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-9)
 
-## Planned — Iteration 9 — Plugin scaffold + webhook + cost alerts (v0.9)
+## Planned — Iteration 10 — Plugin scaffold + webhook + cost alerts (v0.10)
 
 - `tokenmeter scaffold` fully implemented for all four plugin types (provider, sink, middleware, backend)
 - Webhook sink — POST `UsageEvent` JSON to any endpoint
 - Cost-alert middleware — configurable USD threshold → log + webhook
 - Prometheus `/metrics` scrape endpoint (optional, for shared deployment)
 
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-9)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-10)
 
-## Planned — Iteration 10 — VS Code extension (v0.10)
+## Planned — Iteration 11 — Local SLM insights (v0.11)
+
+Privacy-first, on-device analysis — no data leaves the machine:
+
+- `tokenmeter insights` — runs a local SLM via Ollama against SQLite data
+- Natural-language cost pattern analysis, cache efficiency advice, model right-sizing suggestions
+- `tokenmeter insights --last 7d --format markdown` — weekly digest
+- Context builder: aggregated counts + costs only, never raw prompts/responses
+- Config: `insights.ollama_url`, `insights.model`, `insights.context_rows`
+- **Prerequisite before productionising central streaming** — gives every user immediate value from local data without needing any infra
+
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-11)
+
+## Planned — Iteration 12 — VS Code extension + Cursor + Windsurf (v0.12)
 
 - TypeScript extension in `extensions/vscode/`
 - Status bar: live session token count + cost
 - Webview dashboard: usage by model + cost over time
 - Auto-starts daemon if not running
 - Cursor + Windsurf backend adapters
-- GitHub Copilot interception investigation
 
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-10)
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-12)
 
 ---
 
