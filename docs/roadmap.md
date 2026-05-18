@@ -78,13 +78,14 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - Pricing table for 7 Gemini models; cached tokens billed at 25% of input price
 - Unknown models fall back to gemini-2.0-flash pricing
 
-## Planned — Iteration 7 — Per-user attribution (v0.7)
+## Planned — Iteration 7 — Per-user value (v0.7)
 
-- Pseudonymous user IDs: `SHA-256(username + org_salt)`
-- Config: `privacy.hash_user`, `privacy.hash_hostname`, `privacy.org_salt`
-- `UsageEvent.UserID` field (resolved at proxy ingestion, never raw PII in metrics store)
-- `tokenmeter purge --user <name>` per-user GDPR erasure
-- Identity mapping maintained separately from metrics
+Stamp the right user on every event so local analysis is meaningful per-developer — not a central identity system:
+
+- Reliable OS user resolution (`USER` / `USERPROFILE`) stamped at proxy ingestion
+- `tokenmeter query --user <name>` — filter by user
+- `tokenmeter purge --user <name>` — delete one user's rows (GDPR right-to-erasure)
+- Optional `privacy.hash_user: true` (default off) pre-wires pseudonymisation for when central collection is hardened in v0.11
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-7)
 
@@ -100,14 +101,14 @@ Enterprise model coverage — the two largest sources of LLM traffic not yet cap
 
 ## Planned — Iteration 9 — Local SLM insights (v0.9)
 
-Privacy-first, on-device analysis via Ollama — no data leaves the machine:
+**Generate → store → surface.** Insights are persistent, not ephemeral terminal output:
 
-- `tokenmeter insights` — runs a local SLM against SQLite data, streams answer to terminal
-- `tokenmeter insights --last 7d --format markdown` — weekly digest for PR comments / reports
-- Natural-language output: cost patterns, cache efficiency, model right-sizing suggestions, spend anomalies
-- Context builder sends only aggregated counts + costs — never raw prompts or responses
-- Config: `insights.ollama_url`, `insights.model` (default `phi4-mini`), `insights.context_rows`
-- Graceful error if Ollama not running (install hint printed)
+- `tokenmeter insights` — Ollama reads SQLite, generates insight, stores to `insights` table, streams to terminal
+- `GET /insights/latest` — lightweight HTTP endpoint so Grafana dashboard can poll and display
+- Grafana dashboard updated with an **Insights** text panel (latest stored insight, auto-refreshes)
+- `auto_generate: daily` — daemon generates an insight once per day in the background
+- Context builder sends only aggregated counts + costs — never prompts or responses
+- Graceful skip if Ollama not running
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-9)
 
