@@ -13,7 +13,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 5 | v0.5 | OTEL push sink | ✅ Done |
 | 6 | v0.6 | Gemini provider | ✅ Done |
 | 7 | v0.7 | Per-user value | ✅ Done |
-| 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | Planned |
+| 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | ✅ Done |
 | 9 | v0.9 | Local SLM insights (on-device, Ollama) | Planned |
 | 10 | v0.10 | VS Code extension + Cursor + Windsurf surface | Planned |
 | 11 | v0.11 | Central collection hardening + GDPR facade | Planned |
@@ -85,15 +85,14 @@ Each AI tool gets an adapter that auto-detects and configures itself:
 - `tokenmeter purge --user <name>` — GDPR right-to-erasure per individual
 - Optional pseudonymisation: `privacy.hash_user: true` → `SHA-256(username + org_salt)`; salt via `TOKENMETER_ORG_SALT` env var; default off
 
-## Planned — Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)
+## ✅ Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)
 
 Enterprise model coverage — the two largest sources of LLM traffic not yet captured:
 
-- **GitHub Copilot** — intercept investigation (env var spike → VS Code extension wrapper if needed); wire format parser for `api.githubcopilot.com`
-- **AWS Bedrock** — Converse API provider plugin (`bedrock-runtime.<region>.amazonaws.com`); SigV4 transparent pass-through; cost table for Claude/Titan/Llama/Mistral on Bedrock
-- `tokenmeter verify` updated to show Copilot routing status
-
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-8)
+- **GitHub Copilot** — HTTP CONNECT MITM interception (`internal/mitm/`); ECDSA local CA with on-demand per-host cert signing; VS Code `http.proxy` + `http.proxyStrictSSL: false` patched automatically by `tokenmeter install`; `tokenmeter cert install` adds CA to system trust store (macOS, Debian, Fedora)
+- **AWS Bedrock** — Converse API + InvokeModelWithResponseStream provider plugin; detects `*.bedrock.amazonaws.com`; cost table for Claude, Llama, Mistral, Nova on Bedrock; transparent SigV4 pass-through
+- Copilot provider delegates to OpenAI-compatible wire format; cost always 0 (subscription)
+- OpenAI plugin guard-rails: explicit exclusion of Copilot + Bedrock hosts so dedicated plugins always win
 
 ## Planned — Iteration 9 — Local SLM insights (v0.9)
 
