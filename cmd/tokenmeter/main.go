@@ -115,9 +115,15 @@ func cmdStart() *cobra.Command {
 			}
 
 			p := proxy.New(cfg)
+			mux := http.NewServeMux()
+			mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "text/plain")
+				fmt.Fprintln(w, "ok")
+			})
+			mux.Handle("/", p)
 			srv := &http.Server{
 				Addr:    cfg.Proxy.Listen,
-				Handler: p,
+				Handler: mux,
 				// Generous read timeout: SSE streams can be very long.
 				// WriteTimeout deliberately unset — would cut streaming responses.
 				ReadHeaderTimeout: 30 * time.Second,
@@ -289,7 +295,7 @@ func cmdVerify() *cobra.Command {
 			proxyAddr := config.Default().Proxy.Listen
 
 			// 1. Check proxy health.
-			resp, err := http.Get("http://" + proxyAddr + "/")
+			resp, err := http.Get("http://" + proxyAddr + "/health")
 			if err != nil {
 				fmt.Printf("proxy:        FAIL — not reachable at %s (%v)\n", proxyAddr, err)
 			} else {

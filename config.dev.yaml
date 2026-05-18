@@ -1,0 +1,19 @@
+proxy:
+  listen: "127.0.0.1:4191"
+  mode: sidecar
+  service_id: dev-local
+
+sinks:
+  sqlite:
+    enabled: true
+    options:
+      path: "/tmp/tokenmeter-dev.db"
+  otel:
+    enabled: true
+    options:
+      endpoint: "localhost:4317"
+      insecure: true
+      interval_s: 10   # faster flush for dev
+
+retention:
+  days: 7
