@@ -28,11 +28,11 @@ import (
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/gemini"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/openai"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/stdout"
-	// Future iterations:
-	// _ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
 )
 
 // Version is set at build time via ldflags.
