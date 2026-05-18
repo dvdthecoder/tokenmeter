@@ -9,6 +9,7 @@ import (
 func TestInstallCopiesSkillFiles(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // Windows
 
 	a := &Adapter{}
 	if err := a.Install("127.0.0.1:4191"); err != nil {
@@ -26,6 +27,7 @@ func TestInstallCopiesSkillFiles(t *testing.T) {
 func TestUninstallRemovesSkillFiles(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // Windows
 
 	a := &Adapter{}
 	_ = a.Install("127.0.0.1:4191")

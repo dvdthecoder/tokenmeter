@@ -10,6 +10,7 @@ import (
 func TestInstallCreatesConfig(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // Windows
 
 	a := &Adapter{}
 	if err := a.Install("127.0.0.1:4191"); err != nil {
@@ -34,6 +35,7 @@ func TestInstallCreatesConfig(t *testing.T) {
 func TestInstallMergesExistingConfig(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // Windows
 
 	// Pre-existing config with user data.
 	cfgDir := filepath.Join(home, ".config", "opencode")
@@ -64,6 +66,7 @@ func TestInstallMergesExistingConfig(t *testing.T) {
 func TestUninstallRemovesBaseURL(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // Windows
 
 	a := &Adapter{}
 	_ = a.Install("127.0.0.1:4191")
