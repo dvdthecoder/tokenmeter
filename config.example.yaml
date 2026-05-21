@@ -32,3 +32,10 @@ privacy:
 
 retention:
   days: 90                   # auto-purge records older than this
+
+insights:
+  enabled: false
+  ollama_url: "http://localhost:11434"  # Ollama endpoint (https://ollama.com)
+  model: "llama3.2:3b"                  # any model pulled in Ollama; llama3.2:3b is fast and small
+  auto_generate: ""                     # "daily" to generate once per day in background; "" to disable
+  window_days: 7                        # how many days of events to analyse

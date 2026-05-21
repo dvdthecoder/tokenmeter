@@ -1,31 +1,44 @@
 {
-  "title": "tokenmeter — LLM Usage",
+  "title": "tokenmeter \u2014 LLM Usage",
   "uid": "tokenmeter-main",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
-  "time": { "from": "now-24h", "to": "now" },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
   "templating": {
     "list": [
       {
         "name": "user",
         "label": "User",
         "type": "query",
-        "datasource": { "uid": "tokenmeter-prometheus" },
+        "datasource": {
+          "uid": "tokenmeter-prometheus"
+        },
         "query": "label_values(tokenmeter_llm_tokens_input_total, user)",
         "includeAll": true,
         "multi": true,
-        "current": { "text": "All", "value": "$__all" }
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
       },
       {
         "name": "model",
         "label": "Model",
         "type": "query",
-        "datasource": { "uid": "tokenmeter-prometheus" },
+        "datasource": {
+          "uid": "tokenmeter-prometheus"
+        },
         "query": "label_values(tokenmeter_llm_tokens_input_total, model)",
         "includeAll": true,
         "multi": true,
-        "current": { "text": "All", "value": "$__all" }
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        }
       }
     ]
   },
@@ -34,25 +47,50 @@
       "id": 1,
       "title": "Total Cost (USD)",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
-      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "background" },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ]
+        },
+        "colorMode": "background"
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "currencyUSD",
           "decimals": 4,
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 100 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
             ]
           }
         }
       },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum(increase(tokenmeter_llm_cost_usd_total{user=~\"$user\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Cost"
         }
@@ -62,12 +100,29 @@
       "id": 2,
       "title": "Input Tokens",
       "type": "stat",
-      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
-      "options": { "reduceOptions": { "calcs": ["sum"] } },
-      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum(increase(tokenmeter_llm_tokens_input_total{user=~\"$user\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Input"
         }
@@ -77,12 +132,29 @@
       "id": 3,
       "title": "Output Tokens",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
-      "options": { "reduceOptions": { "calcs": ["sum"] } },
-      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum(increase(tokenmeter_llm_tokens_output_total{user=~\"$user\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Output"
         }
@@ -92,12 +164,33 @@
       "id": 4,
       "title": "Cache Hit Tokens",
       "type": "stat",
-      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
-      "options": { "reduceOptions": { "calcs": ["sum"] } },
-      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "blue", "mode": "fixed" } } },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          }
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum(increase(tokenmeter_llm_tokens_cached_total{user=~\"$user\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Cached"
         }
@@ -107,11 +200,23 @@
       "id": 5,
       "title": "Cost over time (USD/hr)",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
-      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 4 } },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum by (user) (rate(tokenmeter_llm_cost_usd_total{user=~\"$user\", model=~\"$model\"}[5m]) * 3600)",
           "legendFormat": "{{user}}"
         }
@@ -121,16 +226,29 @@
       "id": 6,
       "title": "Token rate by model (tokens/min)",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
-      "fieldConfig": { "defaults": { "unit": "short" } },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum by (model) (rate(tokenmeter_llm_tokens_input_total{user=~\"$user\", model=~\"$model\"}[5m]) * 60)",
           "legendFormat": "{{model}} input"
         },
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum by (model) (rate(tokenmeter_llm_tokens_output_total{user=~\"$user\", model=~\"$model\"}[5m]) * 60)",
           "legendFormat": "{{model}} output"
         }
@@ -140,11 +258,22 @@
       "id": 7,
       "title": "P95 Latency by provider (ms)",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
-      "fieldConfig": { "defaults": { "unit": "ms" } },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "histogram_quantile(0.95, sum by (provider, le) (rate(tokenmeter_llm_latency_ms_bucket{user=~\"$user\", model=~\"$model\"}[5m])))",
           "legendFormat": "{{provider}} p95"
         }
@@ -154,12 +283,31 @@
       "id": 8,
       "title": "Cost by user (total)",
       "type": "bargauge",
-      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
-      "options": { "reduceOptions": { "calcs": ["sum"] }, "orientation": "horizontal" },
-      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ]
+        },
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 3
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum by (user) (increase(tokenmeter_llm_cost_usd_total{model=~\"$model\"}[$__range]))",
           "legendFormat": "{{user}}"
         }
@@ -169,16 +317,62 @@
       "id": 9,
       "title": "Cost by model (total)",
       "type": "bargauge",
-      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
-      "options": { "reduceOptions": { "calcs": ["sum"] }, "orientation": "horizontal" },
-      "fieldConfig": { "defaults": { "unit": "currencyUSD", "decimals": 3 } },
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ]
+        },
+        "orientation": "horizontal"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 3
+        }
+      },
       "targets": [
         {
-          "datasource": { "uid": "tokenmeter-prometheus" },
+          "datasource": {
+            "uid": "tokenmeter-prometheus"
+          },
           "expr": "sum by (model) (increase(tokenmeter_llm_cost_usd_total{user=~\"$user\"}[$__range]))",
           "legendFormat": "{{model}}"
         }
       ]
+    },
+    {
+      "id": 11,
+      "title": "AI Insights",
+      "type": "row",
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false
+    },
+    {
+      "id": 10,
+      "title": "Latest AI Insight (tokenmeter insights)",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 24,
+        "h": 6
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "## Local SLM Insights\n\nRun **`tokenmeter insights`** to generate an analysis of your usage data using a local Ollama model.\n\n**Requirements:** [Ollama](https://ollama.com) running locally with `ollama pull llama3.2:3b`\n\n**Usage:**\n\n\nThe API endpoint `GET http://localhost:4191/insights/latest` returns the latest stored insight as JSON."
+      }
     }
   ]
 }

@@ -51,6 +51,9 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=tokenmeter
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/tokenmeter.json
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # reaches host from container on Linux
     restart: unless-stopped
     networks:
       - collector

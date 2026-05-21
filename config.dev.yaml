@@ -17,3 +17,10 @@ sinks:
 
 retention:
   days: 7
+
+insights:
+  enabled: true
+  ollama_url: "http://localhost:11434"
+  model: "llama3.2:3b"
+  auto_generate: ""   # set to "daily" to enable background generation
+  window_days: 7

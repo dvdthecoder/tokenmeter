@@ -11,6 +11,7 @@ type Config struct {
 	Middleware []MiddlewareConfig        `yaml:"middleware"`
 	Privacy    PrivacyConfig            `yaml:"privacy"`
 	Retention  RetentionConfig          `yaml:"retention"`
+	Insights   InsightsConfig           `yaml:"insights"`
 }
 
 type ProxyConfig struct {
@@ -41,6 +42,14 @@ type PrivacyConfig struct {
 
 type RetentionConfig struct {
 	Days int `yaml:"days"` // 0 = keep forever
+}
+
+type InsightsConfig struct {
+	Enabled      bool   `yaml:"enabled"`
+	OllamaURL    string `yaml:"ollama_url"`    // default: http://localhost:11434
+	Model        string `yaml:"model"`         // default: llama3.2:3b
+	AutoGenerate string `yaml:"auto_generate"` // "daily" | "" (disabled)
+	WindowDays   int    `yaml:"window_days"`   // default: 7
 }
 
 func Load(path string) (*Config, error) {
@@ -85,5 +94,14 @@ func applyDefaults(cfg *Config) {
 	cfg.Privacy.HashServiceID = true // always default to hashing
 	if salt := os.Getenv("TOKENMETER_ORG_SALT"); salt != "" {
 		cfg.Privacy.OrgSalt = salt
+	}
+	if cfg.Insights.OllamaURL == "" {
+		cfg.Insights.OllamaURL = "http://localhost:11434"
+	}
+	if cfg.Insights.Model == "" {
+		cfg.Insights.Model = "llama3.2:3b"
+	}
+	if cfg.Insights.WindowDays == 0 {
+		cfg.Insights.WindowDays = 7
 	}
 }

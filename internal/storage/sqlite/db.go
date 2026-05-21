@@ -42,6 +42,15 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_ts         ON events(ts);
 CREATE INDEX IF NOT EXISTS idx_events_service_id ON events(service_id);
 CREATE INDEX IF NOT EXISTS idx_events_model      ON events(model);
+
+CREATE TABLE IF NOT EXISTS insights (
+    id           TEXT PRIMARY KEY,
+    generated_at TEXT NOT NULL,
+    window_days  INTEGER NOT NULL DEFAULT 7,
+    model        TEXT NOT NULL DEFAULT '',
+    content      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_insights_generated_at ON insights(generated_at);
 `
 
 // DB wraps a SQLite connection for tokenmeter event storage.
@@ -277,4 +286,44 @@ func buildWhere(opts QueryOpts) (string, []any) {
 		return "", args
 	}
 	return " WHERE " + strings.Join(clauses, " AND "), args
+}
+
+// Insight is a stored SLM-generated analysis of recent usage data.
+type Insight struct {
+	ID          string    `json:"id"`
+	GeneratedAt time.Time `json:"generated_at"`
+	WindowDays  int       `json:"window_days"`
+	Model       string    `json:"model"`
+	Content     string    `json:"content"`
+}
+
+// InsertInsight stores a generated insight. Duplicate IDs are silently ignored.
+func (d *DB) InsertInsight(i Insight) error {
+	_, err := d.db.Exec(
+		`INSERT OR IGNORE INTO insights (id, generated_at, window_days, model, content)
+		 VALUES (?, ?, ?, ?, ?)`,
+		i.ID,
+		i.GeneratedAt.UTC().Format(time.RFC3339),
+		i.WindowDays, i.Model, i.Content,
+	)
+	return err
+}
+
+// LatestInsight returns the most recently generated insight, or nil if none exist.
+func (d *DB) LatestInsight() (*Insight, error) {
+	row := d.db.QueryRow(
+		`SELECT id, generated_at, window_days, model, content
+		 FROM insights ORDER BY generated_at DESC LIMIT 1`,
+	)
+	var i Insight
+	var tsStr string
+	err := row.Scan(&i.ID, &tsStr, &i.WindowDays, &i.Model, &i.Content)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	i.GeneratedAt, _ = time.Parse(time.RFC3339, tsStr)
+	return &i, nil
 }

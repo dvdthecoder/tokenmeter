@@ -218,3 +218,66 @@ func TestSinkInit(t *testing.T) {
 		t.Error("sink should be enabled after Init")
 	}
 }
+
+func TestInsertAndLatestInsight(t *testing.T) {
+	db := openMemDB(t)
+	ins := storage.Insight{
+		ID:          "ins_001",
+		GeneratedAt: time.Now().UTC().Truncate(time.Second),
+		WindowDays:  7,
+		Model:       "llama3.2:3b",
+		Content:     "Usage looks healthy. Consider caching more.",
+	}
+	if err := db.InsertInsight(ins); err != nil {
+		t.Fatalf("InsertInsight: %v", err)
+	}
+	got, err := db.LatestInsight()
+	if err != nil {
+		t.Fatalf("LatestInsight: %v", err)
+	}
+	if got == nil {
+		t.Fatal("expected non-nil insight")
+	}
+	if got.ID != ins.ID {
+		t.Errorf("id: got %q, want %q", got.ID, ins.ID)
+	}
+	if got.Content != ins.Content {
+		t.Errorf("content: got %q, want %q", got.Content, ins.Content)
+	}
+	if got.Model != ins.Model {
+		t.Errorf("model: got %q, want %q", got.Model, ins.Model)
+	}
+}
+
+func TestLatestInsightEmpty(t *testing.T) {
+	db := openMemDB(t)
+	got, err := db.LatestInsight()
+	if err != nil {
+		t.Fatalf("LatestInsight: %v", err)
+	}
+	if got != nil {
+		t.Errorf("expected nil insight on empty DB, got %+v", got)
+	}
+}
+
+func TestLatestInsightReturnsNewest(t *testing.T) {
+	db := openMemDB(t)
+	older := storage.Insight{
+		ID: "ins_old", GeneratedAt: time.Now().Add(-24 * time.Hour).UTC(),
+		WindowDays: 7, Model: "llama3.2:3b", Content: "older",
+	}
+	newer := storage.Insight{
+		ID: "ins_new", GeneratedAt: time.Now().UTC(),
+		WindowDays: 7, Model: "llama3.2:3b", Content: "newer",
+	}
+	_ = db.InsertInsight(older)
+	_ = db.InsertInsight(newer)
+
+	got, err := db.LatestInsight()
+	if err != nil {
+		t.Fatalf("LatestInsight: %v", err)
+	}
+	if got.ID != "ins_new" {
+		t.Errorf("expected newest insight, got %q", got.ID)
+	}
+}

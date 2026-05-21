@@ -16,8 +16,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"encoding/json"
+
 	"github.com/dvdthecoder/tokenmeter/internal/config"
 	"github.com/dvdthecoder/tokenmeter/internal/daemon"
+	"github.com/dvdthecoder/tokenmeter/internal/insights"
 	"github.com/dvdthecoder/tokenmeter/internal/mitm"
 	"github.com/dvdthecoder/tokenmeter/internal/proxy"
 	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
@@ -61,6 +64,7 @@ func main() {
 		cmdQuery(),
 		cmdPurge(),
 		cmdExport(),
+		cmdInsights(),
 		cmdScaffold(),
 		cmdCert(),
 	)
@@ -126,6 +130,25 @@ func cmdStart() *cobra.Command {
 				w.Header().Set("Content-Type", "text/plain")
 				fmt.Fprintln(w, "ok")
 			})
+			mux.HandleFunc("/insights/latest", func(w http.ResponseWriter, r *http.Request) {
+				db, err := storage.Open(sqlitesink.DefaultDBPath())
+				if err != nil {
+					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
+					return
+				}
+				defer db.Close()
+				ins, err := db.LatestInsight()
+				if err != nil {
+					http.Error(w, "query failed", http.StatusInternalServerError)
+					return
+				}
+				if ins == nil {
+					http.Error(w, "no insights yet — run: tokenmeter insights", http.StatusNotFound)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(ins)
+			})
 			mux.Handle("/", p)
 
 			// Wrap with MITM handler so CONNECT tunnels (Copilot, Bedrock) are intercepted.
@@ -152,6 +175,28 @@ func cmdStart() *cobra.Command {
 					slog.Error("server error", "err", err)
 				}
 			}()
+
+			// Daily auto-generate insight if configured.
+			if cfg.Insights.Enabled && cfg.Insights.AutoGenerate == "daily" {
+				go func() {
+					ticker := time.NewTicker(24 * time.Hour)
+					defer ticker.Stop()
+					for range ticker.C {
+						db, err := storage.Open(sqlitesink.DefaultDBPath())
+						if err != nil {
+							slog.Warn("insights: open db", "err", err)
+							continue
+						}
+						_, err = insights.Run(context.Background(), db, cfg.Insights, nil)
+						db.Close()
+						if err != nil {
+							slog.Warn("insights: auto-generate skipped", "err", err)
+						} else {
+							slog.Info("insights: auto-generated daily insight")
+						}
+					}
+				}()
+			}
 
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -601,6 +646,76 @@ func cmdCertPath() *cobra.Command {
 func dataDir() string {
 	home, _ := os.UserHomeDir()
 	return home + "/.local/share/tokenmeter"
+}
+
+func cmdInsights() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "insights",
+		Short: "Generate AI insights from local usage data via Ollama",
+		Long: `Queries the local SQLite database, builds an aggregated (no prompt/response content)
+usage summary, sends it to a locally running Ollama SLM, stores the result, and
+streams it to the terminal. Requires Ollama to be running (https://ollama.com).`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			showOnly, _ := cmd.Flags().GetBool("show")
+			modelOverride, _ := cmd.Flags().GetString("model")
+			lastStr, _ := cmd.Flags().GetString("last")
+
+			db, err := openDB(cmd)
+			if err != nil {
+				return err
+			}
+			defer db.Close()
+
+			// --show: print the latest stored insight without generating.
+			if showOnly {
+				ins, err := db.LatestInsight()
+				if err != nil {
+					return err
+				}
+				if ins == nil {
+					fmt.Fprintln(os.Stdout, "No insights stored yet. Run 'tokenmeter insights' to generate one.")
+					return nil
+				}
+				fmt.Fprintf(os.Stdout, "Generated: %s  Model: %s  Window: %dd\n\n",
+					ins.GeneratedAt.UTC().Format("2006-01-02 15:04 UTC"), ins.Model, ins.WindowDays)
+				fmt.Fprintln(os.Stdout, ins.Content)
+				return nil
+			}
+
+			cfg := config.Default()
+			if modelOverride != "" {
+				cfg.Insights.Model = modelOverride
+			}
+			if lastStr != "" {
+				d, err := parseDuration(lastStr)
+				if err != nil {
+					return fmt.Errorf("--last: %w", err)
+				}
+				cfg.Insights.WindowDays = int(d.Hours() / 24)
+				if cfg.Insights.WindowDays < 1 {
+					cfg.Insights.WindowDays = 1
+				}
+			}
+
+			fmt.Fprintf(os.Stdout, "Querying %d days of usage data → %s @ %s\n\n",
+				cfg.Insights.WindowDays, cfg.Insights.Model, cfg.Insights.OllamaURL)
+
+			ins, err := insights.Run(cmd.Context(), db, cfg.Insights, func(token string) {
+				fmt.Print(token)
+			})
+			fmt.Println() // newline after streaming output
+			if err != nil {
+				return fmt.Errorf("insights: %w\n\nMake sure Ollama is running: https://ollama.com\nThen pull the model: ollama pull %s", err, cfg.Insights.Model)
+			}
+			fmt.Fprintf(os.Stdout, "\n[stored as %s]\n", ins.ID)
+			return nil
+		},
+	}
+	cmd.Flags().Bool("show", false, "Print the latest stored insight without generating a new one")
+	cmd.Flags().String("model", "", "Ollama model to use (default: llama3.2:3b)")
+	cmd.Flags().String("last", "", "Analyze events from the last duration, e.g. 7d, 30d (default: 7d)")
+	cmd.Flags().String("db", "", "Path to SQLite database")
+	return cmd
 }
 
 func fileExists(path string) bool {
