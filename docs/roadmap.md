@@ -14,7 +14,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 6 | v0.6 | Gemini provider | ✅ Done |
 | 7 | v0.7 | Per-user value | ✅ Done |
 | 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | ✅ Done |
-| 9 | v0.9 | Local SLM insights (on-device, Ollama) | Planned |
+| 9 | v0.9 | Local SLM insights (on-device, Ollama) | ✅ Done |
 | 10 | v0.10 | VS Code extension + Cursor + Windsurf surface | Planned |
 | 11 | v0.11 | Central collection hardening + GDPR facade | Planned |
 | 12 | v0.12 | Plugin scaffold + webhook + cost alerts | Planned |
@@ -94,18 +94,16 @@ Enterprise model coverage — the two largest sources of LLM traffic not yet cap
 - Copilot provider delegates to OpenAI-compatible wire format; cost always 0 (subscription)
 - OpenAI plugin guard-rails: explicit exclusion of Copilot + Bedrock hosts so dedicated plugins always win
 
-## Planned — Iteration 9 — Local SLM insights (v0.9)
+## ✅ Iteration 9 — Local SLM insights (v0.9)
 
 **Generate → store → surface.** Insights are persistent, not ephemeral terminal output:
 
-- `tokenmeter insights` — Ollama reads SQLite, generates insight, stores to `insights` table, streams to terminal
-- `GET /insights/latest` — lightweight HTTP endpoint so Grafana dashboard can poll and display
-- Grafana dashboard updated with an **Insights** text panel (latest stored insight, auto-refreshes)
-- `auto_generate: daily` — daemon generates an insight once per day in the background
-- Context builder sends only aggregated counts + costs — never prompts or responses
-- Graceful skip if Ollama not running
-
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-9)
+- `tokenmeter insights` — aggregates SQLite events, sends privacy-safe context to Ollama, stores result, streams tokens to terminal; `--show` prints latest stored insight; `--last 30d` / `--model` flags
+- `GET /insights/latest` — JSON endpoint served by the proxy for Grafana and other consumers
+- `internal/insights/context.go` — `BuildContext()` produces model/user/cost/latency breakdown; zero prompt or response content included (GDPR-safe)
+- `internal/insights/ollama.go` — streaming HTTP client for Ollama `/api/generate`; graceful error if Ollama unreachable (non-fatal, skipped with log message)
+- `insights.auto_generate: daily` — daemon starts a background goroutine firing a 24h ticker
+- Grafana: Infinity datasource provisioned, Insights row + text panel with usage instructions added to dashboard
 
 ## Planned — Iteration 10 — VS Code extension + Cursor + Windsurf surface (v0.10)
 
