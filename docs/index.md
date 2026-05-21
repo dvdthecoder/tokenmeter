@@ -5,15 +5,17 @@
 tokenmeter sits between your AI coding tools and the model APIs, capturing token usage metadata — without ever storing prompt or response content.
 
 ```
-Claude Code / OpenCode / Aider / VS Code
+Claude Code / Copilot / OpenCode / Aider / VS Code
         ↓
   tokenmeter  (127.0.0.1:4191)
         ↓
-  Anthropic / OpenAI / vLLM / Azure
+  Anthropic / OpenAI / Gemini / Copilot / Bedrock / vLLM
         ↓
   UsageEvent  ← model · tokens · cost · latency
         ↓
   SQLite · OTEL · Prometheus
+        ↓
+  tokenmeter insights  ← local SLM analysis (Ollama, no cloud)
 ```
 
 ---
@@ -60,8 +62,19 @@ Prompts and responses are **never stored**.
 | Codex CLI | `OPENAI_BASE_URL` | ✅ |
 | Continue.dev (VS Code) | `OPENAI_BASE_URL` | ✅ |
 | Cline (VS Code) | `settings.json` patch | ✅ |
-| Gemini CLI | native API | 🔨 v0.5 |
-| GitHub Copilot | hardcoded endpoint | 🔨 v0.8 |
+| Gemini CLI | native Gemini API | ✅ |
+| GitHub Copilot | MITM proxy + local CA | ✅ |
+
+## Provider coverage
+
+| Provider | Wire format | Cost table |
+|---|---|---|
+| Anthropic | SSE + REST, all cache tiers | ✅ |
+| OpenAI | SSE (usage injection) + REST | ✅ |
+| Google Gemini | SSE + REST `usageMetadata` | ✅ |
+| GitHub Copilot | OpenAI-compatible (HTTPS MITM) | ✅ (subscription = $0) |
+| AWS Bedrock | Converse API + InvokeModelWithResponseStream | ✅ |
+| OpenAI-compatible | vLLM, LiteLLM, Ollama, OpenCode runner | ✅ |
 
 ---
 
@@ -71,7 +84,8 @@ Prompts and responses are **never stored**.
 - **Local-first** — SQLite on your machine, zero cloud dependencies
 - **Tool-agnostic** — works via env var override, no SDK required
 - **Plugin architecture** — add providers, sinks, backends without touching core code
-- **GDPR-ready** — `service_id` hashed, right to erasure via `tokenmeter purge`
+- **GDPR-ready** — `service_id` hashed, per-user right to erasure via `tokenmeter purge --user`
+- **On-device insights** — `tokenmeter insights` uses a local Ollama SLM for cost analysis; no data leaves the machine
 
 [Get started →](getting-started/installation.md){ .md-button .md-button--primary }
 [Roadmap →](roadmap.md){ .md-button }

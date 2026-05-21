@@ -66,6 +66,35 @@ tokenmeter scaffold provider gemini
 | gemini-1.5-flash | $0.075 | $0.30 |
 | gemini-1.5-flash-8b | $0.0375 | $0.15 |
 
+## Reference: Copilot provider
+
+`plugins/providers/copilot/copilot.go` intercepts GitHub Copilot traffic routed through tokenmeter's MITM proxy:
+
+- `Detect()` matches `api.githubcopilot.com` (with or without port)
+- Wire format is OpenAI-compatible — stream parsing and response parsing delegate to the OpenAI plugin directly
+- `EstimateCost()` always returns `0.0` — Copilot is subscription-based
+- Requires the MITM CA to be installed (`tokenmeter cert install`) and VS Code proxied (`http.proxy` setting)
+
+## Reference: Bedrock provider
+
+`plugins/providers/bedrock/bedrock.go` handles AWS Bedrock's two invocation APIs:
+
+- `Detect()` matches any host containing `bedrock` and `amazonaws.com`
+- **Converse API** (`/converse`, `/converse-stream`): parses `usage.inputTokens` / `usage.outputTokens`
+- **InvokeModelWithResponseStream**: parses the `amazon-bedrock-invocationMetrics` metadata event
+- `UpstreamURL()` preserves the original regional host (e.g. `bedrock-runtime.us-east-1.amazonaws.com`) — SigV4 signing is done by the calling SDK, not tokenmeter
+- Cost table covers Claude, Llama, Mistral, and Amazon Nova models on Bedrock (us-east-1, on-demand)
+
+| Model | Input / 1M | Output / 1M |
+|---|---|---|
+| anthropic.claude-opus-4-5 | $15.00 | $75.00 |
+| anthropic.claude-sonnet-4-5 | $3.00 | $15.00 |
+| anthropic.claude-haiku-4-5 | $0.80 | $4.00 |
+| anthropic.claude-3-5-sonnet-20241022 | $3.00 | $15.00 |
+| meta.llama3-70b-instruct-v1:0 | $2.65 | $3.50 |
+| amazon.nova-pro-v1:0 | $0.80 | $3.20 |
+| amazon.nova-lite-v1:0 | $0.06 | $0.24 |
+
 ## Writing a new provider
 
 1. Run `tokenmeter scaffold provider <name>`

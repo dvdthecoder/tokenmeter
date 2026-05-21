@@ -28,19 +28,34 @@ sinks:
       path: ""                # default: ~/.local/share/tokenmeter/events.db
       retention_days: 90      # auto-purge events older than this on startup
 
-  # otel:                     # coming in v0.5
-  #   enabled: false
-  #   options:
-  #     endpoint: localhost:4317
-  #     insecure: true
+  otel:
+    enabled: false
+    options:
+      endpoint: "localhost:4317"   # OTLP gRPC endpoint
+      insecure: true
+      interval_s: 60
+
+  prometheus:
+    enabled: false
+    options:
+      listen: "127.0.0.1:9090"
 
 privacy:
-  hash_service_id: true       # SHA-256 hash service_id before storage
+  hash_service_id: true       # SHA-256 hash service_id before storage (default: true)
+  hash_user: false            # pseudonymise username: SHA-256(username + org_salt)
+  org_salt: ""                # shared team salt; prefer TOKENMETER_ORG_SALT env var
   encrypt_at_rest: false      # SQLite encryption (requires TOKENMETER_ENCRYPTION_KEY)
-  encryption_key: ""          # prefer the env var instead
+  encryption_key: ""          # prefer TOKENMETER_ENCRYPTION_KEY env var
 
 retention:
-  days: 90                    # global default, overridden per sink
+  days: 90                    # auto-purge events older than this on startup
+
+insights:
+  enabled: false
+  ollama_url: "http://localhost:11434"  # local Ollama endpoint
+  model: "llama3.2:3b"                  # any model pulled in Ollama
+  auto_generate: ""                     # "daily" to auto-generate in background
+  window_days: 7                        # days of events to analyse
 ```
 
 ## Environment variables
@@ -51,6 +66,7 @@ retention:
 | `OPENAI_BASE_URL` | Set by `tokenmeter install` — points OpenAI-compatible tools at the proxy |
 | `TOKENMETER_USER` | Override the username attributed to events (default: `$USER`) |
 | `TOKENMETER_ENCRYPTION_KEY` | SQLite encryption key (32 hex chars) |
+| `TOKENMETER_ORG_SALT` | Shared salt for user pseudonymisation across team machines |
 
 ## Pointing at custom upstreams
 

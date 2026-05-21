@@ -169,12 +169,69 @@ tokenmeter export --format csv > events.csv
 
 ---
 
-## `tokenmeter scaffold`
+## `tokenmeter insights`
 
-Generate a plugin stub. (Full implementation coming in v0.7.)
+Generate AI-powered insights from local usage data using a locally running [Ollama](https://ollama.com) SLM. The context sent to Ollama contains only aggregated token counts and costs — never any prompt or response content.
 
 ```sh
-tokenmeter scaffold provider gemini
+tokenmeter insights                      # generate + stream to terminal
+tokenmeter insights --show               # print the latest stored insight
+tokenmeter insights --last 30d           # analyze last 30 days
+tokenmeter insights --model qwen3:4b     # use a different Ollama model
+```
+
+**Requirements:** Ollama running locally with the model pulled:
+```sh
+brew install ollama     # macOS
+ollama pull llama3.2:3b # default model
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--show` | false | Print latest stored insight without generating |
+| `--last` | `7d` | Time window to analyze |
+| `--model` | `llama3.2:3b` | Ollama model name |
+| `--db` | default path | Path to SQLite database |
+
+The latest stored insight is also available at `GET http://localhost:4191/insights/latest` as JSON.
+
+---
+
+## `tokenmeter cert`
+
+Manage the local MITM CA certificate required for GitHub Copilot interception.
+
+```sh
+tokenmeter cert install   # generate CA + install to system trust store
+tokenmeter cert path      # print the path to the CA certificate
+```
+
+### `cert install`
+
+Generates a local ECDSA CA (stored in `~/.local/share/tokenmeter/ca.{key,crt}`) and installs it into the system trust store:
+
+- **macOS** — `security add-trusted-cert` to System keychain (prompts for password)
+- **Debian/Ubuntu** — copies to `/usr/local/share/ca-certificates/` and runs `update-ca-certificates`
+- **Fedora/Arch** — `trust anchor --store`
+
+After running `tokenmeter install`, the VS Code `settings.json` is also patched with:
+```json
+{
+  "http.proxy": "http://127.0.0.1:4191",
+  "http.proxyStrictSSL": false
+}
+```
+
+This routes GitHub Copilot traffic through the MITM proxy.
+
+---
+
+## `tokenmeter scaffold`
+
+Generate a plugin stub.
+
+```sh
+tokenmeter scaffold provider myvendor
 tokenmeter scaffold sink webhook
 tokenmeter scaffold backend cursor
 ```

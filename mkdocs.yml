@@ -58,7 +58,7 @@ nav:
     - OpenCode: tools/opencode.md
     - Codex CLI: tools/codex.md
     - Aider: tools/aider.md
-    - VS Code: tools/vscode.md
+    - VS Code + Copilot: tools/vscode.md
   - Plugin Guide:
     - Overview: plugins/overview.md
     - Provider Plugins: plugins/providers.md
