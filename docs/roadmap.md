@@ -15,9 +15,11 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 7 | v0.7 | Per-user value | ✅ Done |
 | 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | ✅ Done |
 | 9 | v0.9 | Local SLM insights (on-device, Ollama) | ✅ Done |
-| 10 | v0.10 | VS Code extension + Cursor + Windsurf surface | Planned |
+| 10 | v0.10 | VS Code extension — status bar + usage dashboard | Planned |
 | 11 | v0.11 | Central collection hardening + GDPR facade | Planned |
 | 12 | v0.12 | Plugin scaffold + webhook + cost alerts | Planned |
+| 13 | v0.13 | Integration test harness — end-to-end smoke tests | Planned |
+| 14 | v0.14 | Cursor + Windsurf backend adapters | Planned |
 
 ---
 
@@ -105,13 +107,14 @@ Enterprise model coverage — the two largest sources of LLM traffic not yet cap
 - `insights.auto_generate: daily` — daemon starts a background goroutine firing a 24h ticker
 - Grafana: Infinity datasource provisioned, Insights row + text panel with usage instructions added to dashboard
 
-## Planned — Iteration 10 — VS Code extension + Cursor + Windsurf surface (v0.10)
+## Planned — Iteration 10 — VS Code extension (v0.10)
+
+Surface data where developers already are — inside the editor, without opening a terminal or Grafana.
 
 - TypeScript extension in `extensions/vscode/`
-- Status bar: live session token count + estimated cost
-- Webview dashboard: usage by model + cost over time (reads local SQLite)
-- Auto-starts daemon if not running
-- Cursor + Windsurf backend adapters
+- Status bar item: live session token count + estimated cost, updates after each completion
+- Webview dashboard panel: usage by model + cost over time (reads local SQLite via `tokenmeter query` subprocess — no native deps in extension)
+- Auto-starts tokenmeter daemon if not running on startup
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-10)
 
@@ -134,6 +137,25 @@ GDPR tooling is sequenced here because it's the privacy layer applied *when* dat
 - Cost-alert middleware — configurable USD threshold → log + webhook
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-12)
+
+## Planned — Iteration 13 — Integration test harness (v0.13)
+
+End-to-end smoke tests that fire real HTTP through a live proxy and assert SQLite output — no mocking, no real API keys:
+
+- In-process proxy started on a random port; stub upstream server replays recorded API responses
+- All five providers covered: Anthropic, OpenAI, Gemini, Copilot (MITM), Bedrock
+- Streaming + non-streaming paths asserted separately
+- Per-user attribution, `hash_user`, and `purge --user` verified
+- `make test-e2e` target, runs in CI with no external dependencies
+
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-13)
+
+## Planned — Iteration 14 — Cursor + Windsurf backend adapters (v0.14)
+
+- Cursor backend adapter — detects Cursor install, patches config, verifies `OPENAI_BASE_URL` routing
+- Windsurf backend adapter — same pattern
+
+[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-14)
 
 ---
 
