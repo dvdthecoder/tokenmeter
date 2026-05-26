@@ -64,6 +64,7 @@ Prompts and responses are **never stored**.
 | Cline (VS Code) | `settings.json` patch | ✅ |
 | Gemini CLI | native Gemini API | ✅ |
 | GitHub Copilot | MITM proxy + local CA | ✅ |
+| **VS Code Extension** | status bar + dashboard webview | ✅ |
 
 ## Provider coverage
 
@@ -86,6 +87,7 @@ Prompts and responses are **never stored**.
 - **Plugin architecture** — add providers, sinks, backends without touching core code
 - **GDPR-ready** — `service_id` hashed, per-user right to erasure via `tokenmeter purge --user`
 - **On-device insights** — `tokenmeter insights` uses a local Ollama SLM for cost analysis; no data leaves the machine
+- **VS Code extension** — live status bar token count + cost, usage dashboard webview, auto-starts daemon
 
 [Get started →](getting-started/installation.md){ .md-button .md-button--primary }
 [Roadmap →](roadmap.md){ .md-button }

@@ -1,6 +1,6 @@
 # VS Code
 
-VS Code itself doesn't call LLM APIs — its extensions do. tokenmeter supports three of the most popular:
+VS Code itself doesn't call LLM APIs — its extensions do. tokenmeter supports three of the most popular, and ships its own VS Code extension for live in-editor visibility.
 
 | Extension | Hook | Auto-configured |
 |---|---|---|
@@ -16,6 +16,54 @@ tokenmeter verify
 ```
 
 Then open a **new VS Code window** so it inherits the updated environment.
+
+---
+
+## tokenmeter VS Code Extension
+
+The tokenmeter extension puts live token counts and cost directly in the editor — no terminal, no Grafana.
+
+### Features
+
+- **Status bar** — `⬡ 1.2k tokens · $0.0042` in the bottom-right corner; live session total, refreshes every 10 s
+- **Dashboard panel** — tokens by model (bar chart), cost over time (line chart), recent requests table; all sourced from `tokenmeter query --format json`
+- **Auto-start** — starts the tokenmeter daemon on VS Code launch if it is not already running
+
+### Install
+
+**From VSIX (build from source):**
+
+```sh
+cd extensions/vscode
+npm install
+npm run build
+```
+
+Then in VS Code: **Extensions → ⋯ → Install from VSIX** and select the built `.vsix`, or press **F5** in the `extensions/vscode` workspace to launch a development host.
+
+### Usage
+
+1. Open VS Code — the extension activates automatically (`onStartupFinished`)
+2. The status bar item appears in the bottom-right; click it to open the dashboard
+3. Run any command from the palette with `⌘⇧P` → `Tokenmeter:`
+
+### Commands
+
+| Command | Description |
+|---|---|
+| `Tokenmeter: Open Dashboard` | Open the usage dashboard webview panel |
+| `Tokenmeter: Start Daemon` | Manually start the tokenmeter daemon |
+| `Tokenmeter: Refresh Status Bar` | Force-refresh the status bar count |
+
+### Configuration
+
+| Setting | Default | Description |
+|---|---|---|
+| `tokenmeter.binaryPath` | `""` | Absolute path to the tokenmeter binary; empty = use `PATH` |
+| `tokenmeter.pollIntervalSeconds` | `10` | Status bar refresh interval in seconds |
+| `tokenmeter.autoStartDaemon` | `true` | Start the daemon automatically on VS Code launch |
+
+---
 
 ## Continue.dev
 

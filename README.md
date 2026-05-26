@@ -5,6 +5,8 @@
 
 Thin, GDPR-compliant token usage proxy for LLM APIs. Sits between your AI coding tools and the model APIs — captures token counts, cost, and latency without ever storing prompt or response content.
 
+Works with Claude Code, Copilot, Cline, Codex, Aider, OpenCode, Continue.dev — any tool that reads `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL`.
+
 ## Install
 
 ```sh
@@ -20,6 +22,14 @@ Restart your shell. Every AI tool request is now captured automatically.
 tokenmeter verify          # check proxy + all detected tools
 tokenmeter query --last 1h # view captured events
 ```
+
+## What you get
+
+- **CLI** — `tokenmeter query`, `purge`, `export`, `insights`
+- **VS Code extension** — live status bar token count + cost (`⬡ 1.2k tokens · $0.0042`), dashboard webview with charts, auto-starts daemon
+- **OTEL + Prometheus** — push metrics to any collector; Grafana dashboard included
+- **On-device insights** — local SLM analysis via Ollama; no data leaves the machine
+- **GDPR tooling** — per-user `purge --user`, hashed service IDs, retention auto-purge
 
 ## Docs
 
