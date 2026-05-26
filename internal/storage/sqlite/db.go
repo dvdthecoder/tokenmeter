@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_ts         ON events(ts);
 CREATE INDEX IF NOT EXISTS idx_events_service_id ON events(service_id);
 CREATE INDEX IF NOT EXISTS idx_events_model      ON events(model);
-CREATE INDEX IF NOT EXISTS idx_events_session_id ON events(session_id);
 
 CREATE TABLE IF NOT EXISTS insights (
     id           TEXT PRIMARY KEY,
