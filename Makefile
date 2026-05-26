@@ -107,7 +107,7 @@ dev-logs:
 
 ## Query recent events from the dev SQLite database
 dev-query:
-	./bin/$(BINARY) query --config $(DEV_CONFIG) --last 1h
+	./bin/$(BINARY) query --db /tmp/tokenmeter-dev.db --last 1h
 
 ## Show proxy + collector status
 dev-status:
