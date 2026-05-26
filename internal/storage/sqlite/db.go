@@ -23,6 +23,7 @@ const ddl = `
 CREATE TABLE IF NOT EXISTS events (
     id                     TEXT PRIMARY KEY,
     ts                     TEXT NOT NULL,
+    session_id             TEXT NOT NULL DEFAULT '',
     provider               TEXT NOT NULL DEFAULT '',
     model                  TEXT NOT NULL DEFAULT '',
     service_id             TEXT NOT NULL DEFAULT '',
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_ts         ON events(ts);
 CREATE INDEX IF NOT EXISTS idx_events_service_id ON events(service_id);
 CREATE INDEX IF NOT EXISTS idx_events_model      ON events(model);
+CREATE INDEX IF NOT EXISTS idx_events_session_id ON events(session_id);
 
 CREATE TABLE IF NOT EXISTS insights (
     id           TEXT PRIMARY KEY,
@@ -79,7 +81,28 @@ func Open(path string) (*DB, error) {
 		db.Close()
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+	if err := runMigrations(db); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("migration: %w", err)
+	}
 	return &DB{db: db}, nil
+}
+
+// runMigrations applies additive schema changes to existing databases.
+func runMigrations(db *sql.DB) error {
+	additive := []string{
+		`ALTER TABLE events ADD COLUMN session_id TEXT NOT NULL DEFAULT ''`,
+	}
+	for _, stmt := range additive {
+		if _, err := db.Exec(stmt); err != nil {
+			if strings.Contains(err.Error(), "duplicate column name") {
+				continue
+			}
+			return err
+		}
+	}
+	_, _ = db.Exec(`CREATE INDEX IF NOT EXISTS idx_events_session_id ON events(session_id)`)
+	return nil
 }
 
 // Close releases the database connection.
@@ -93,12 +116,13 @@ func (d *DB) Insert(e providers.UsageEvent) error {
 	}
 	_, err := d.db.Exec(`
 		INSERT OR IGNORE INTO events
-		  (id, ts, provider, model, service_id, username, client_name, client_version,
+		  (id, ts, session_id, provider, model, service_id, username, client_name, client_version,
 		   service_tier, inference_geo, tokens_input, tokens_output, tokens_cached,
 		   tokens_cached_creation, latency_ms, cost_usd, streaming)
-		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		e.RequestID,
 		e.Timestamp.UTC().Format(time.RFC3339),
+		e.SessionID,
 		e.Provider, e.Model, e.ServiceID, e.Username, e.ClientName, e.ClientVersion,
 		e.ServiceTier, e.InferenceGeo,
 		e.TokensInput, e.TokensOutput, e.TokensCached, e.TokensCachedCreation,
@@ -118,21 +142,33 @@ type QueryOpts struct {
 
 // Row is a query result row — a subset of UsageEvent for display/export.
 type Row struct {
-	ID                  string    `json:"id"`
-	Timestamp           time.Time `json:"timestamp"`
-	Provider            string    `json:"provider"`
-	Model               string    `json:"model"`
-	Username            string    `json:"username"`
-	ClientName          string    `json:"client_name"`
-	ClientVersion       string    `json:"client_version"`
-	ServiceTier         string    `json:"service_tier"`
-	TokensInput         int64     `json:"tokens_input"`
-	TokensOutput        int64     `json:"tokens_output"`
-	TokensCached        int64     `json:"tokens_cached"`
-	TokensCachedCreation int64    `json:"tokens_cached_creation"`
-	LatencyMS           int64     `json:"latency_ms"`
-	CostUSD             float64   `json:"cost_usd"`
-	Streaming           bool      `json:"streaming"`
+	ID                   string    `json:"id"`
+	Timestamp            time.Time `json:"timestamp"`
+	SessionID            string    `json:"session_id"`
+	Provider             string    `json:"provider"`
+	Model                string    `json:"model"`
+	Username             string    `json:"username"`
+	ClientName           string    `json:"client_name"`
+	ClientVersion        string    `json:"client_version"`
+	ServiceTier          string    `json:"service_tier"`
+	TokensInput          int64     `json:"tokens_input"`
+	TokensOutput         int64     `json:"tokens_output"`
+	TokensCached         int64     `json:"tokens_cached"`
+	TokensCachedCreation int64     `json:"tokens_cached_creation"`
+	LatencyMS            int64     `json:"latency_ms"`
+	CostUSD              float64   `json:"cost_usd"`
+	Streaming            bool      `json:"streaming"`
+}
+
+// Stats holds aggregate metrics for a query window.
+type Stats struct {
+	Requests      int     `json:"requests"`
+	TokensInput   int64   `json:"tokens_input"`
+	TokensOutput  int64   `json:"tokens_output"`
+	TokensCached  int64   `json:"tokens_cached"`
+	CostUSD       float64 `json:"cost_usd"`
+	LatencyMSAvg  float64 `json:"latency_ms_avg"`
+	Sessions      int     `json:"sessions"`
 }
 
 // Query returns events matching opts, ordered by timestamp descending.
@@ -142,7 +178,7 @@ func (d *DB) Query(opts QueryOpts) ([]Row, error) {
 	if opts.Limit > 0 {
 		limit = fmt.Sprintf(" LIMIT %d", opts.Limit)
 	}
-	q := `SELECT id, ts, provider, model, username, client_name, client_version,
+	q := `SELECT id, ts, session_id, provider, model, username, client_name, client_version,
 	             service_tier, tokens_input, tokens_output, tokens_cached,
 	             tokens_cached_creation, latency_ms, cost_usd, streaming
 	      FROM events` + where + ` ORDER BY ts DESC` + limit
@@ -158,7 +194,7 @@ func (d *DB) Query(opts QueryOpts) ([]Row, error) {
 		var tsStr string
 		var streaming int
 		if err := rows.Scan(
-			&r.ID, &tsStr, &r.Provider, &r.Model, &r.Username,
+			&r.ID, &tsStr, &r.SessionID, &r.Provider, &r.Model, &r.Username,
 			&r.ClientName, &r.ClientVersion, &r.ServiceTier,
 			&r.TokensInput, &r.TokensOutput, &r.TokensCached,
 			&r.TokensCachedCreation, &r.LatencyMS, &r.CostUSD, &streaming,
@@ -198,10 +234,28 @@ func (d *DB) AutoPurge(retentionDays int) (int64, error) {
 	return d.Purge(time.Now().AddDate(0, 0, -retentionDays))
 }
 
+// QueryStats returns aggregate metrics for events matching opts.
+func (d *DB) QueryStats(opts QueryOpts) (Stats, error) {
+	where, args := buildWhere(opts)
+	row := d.db.QueryRow(`
+		SELECT COUNT(*),
+		       COALESCE(SUM(tokens_input), 0),
+		       COALESCE(SUM(tokens_output), 0),
+		       COALESCE(SUM(tokens_cached), 0),
+		       COALESCE(SUM(cost_usd), 0),
+		       COALESCE(AVG(latency_ms), 0),
+		       COUNT(DISTINCT CASE WHEN session_id != '' THEN session_id END)
+		FROM events`+where, args...)
+	var s Stats
+	err := row.Scan(&s.Requests, &s.TokensInput, &s.TokensOutput, &s.TokensCached,
+		&s.CostUSD, &s.LatencyMSAvg, &s.Sessions)
+	return s, err
+}
+
 // WriteTable renders rows as a human-readable aligned table to w.
 func WriteTable(w io.Writer, rows []Row) {
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "TIME\tMODEL\tCLIENT\tUSER\tIN\tOUT\tCACHED\tCOST")
+	fmt.Fprintln(tw, "TIME\tSESSION\tMODEL\tCLIENT\tUSER\tIN\tOUT\tCACHED\tCOST")
 	var totalIn, totalOut, totalCached int64
 	var totalCost float64
 	for _, r := range rows {
@@ -209,9 +263,16 @@ func WriteTable(w io.Writer, rows []Row) {
 		if r.ClientVersion != "" {
 			client += "@" + r.ClientVersion
 		}
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%d\t%d\t%d\t$%.6f\n",
+		sess := r.SessionID
+		if len(sess) > 12 {
+			sess = sess[:12]
+		}
+		if sess == "" {
+			sess = "—"
+		}
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t$%.6f\n",
 			r.Timestamp.UTC().Format("2006-01-02T15:04:05Z"),
-			r.Model, client, r.Username,
+			sess, r.Model, client, r.Username,
 			r.TokensInput, r.TokensOutput, r.TokensCached, r.CostUSD,
 		)
 		totalIn += r.TokensInput
@@ -219,8 +280,8 @@ func WriteTable(w io.Writer, rows []Row) {
 		totalCached += r.TokensCached
 		totalCost += r.CostUSD
 	}
-	fmt.Fprintln(tw, strings.Repeat("─", 8)+"\t"+strings.Repeat("─", 8)+"\t\t\t\t\t\t")
-	fmt.Fprintf(tw, "TOTAL (%d)\t\t\t\t%d\t%d\t%d\t$%.6f\n",
+	fmt.Fprintln(tw, strings.Repeat("─", 8)+"\t\t"+strings.Repeat("─", 8)+"\t\t\t\t\t\t")
+	fmt.Fprintf(tw, "TOTAL (%d)\t\t\t\t\t%d\t%d\t%d\t$%.6f\n",
 		len(rows), totalIn, totalOut, totalCached, totalCost)
 	tw.Flush()
 }
@@ -236,7 +297,7 @@ func WriteJSON(w io.Writer, rows []Row) error {
 func WriteCSV(w io.Writer, rows []Row) error {
 	cw := csv.NewWriter(w)
 	_ = cw.Write([]string{
-		"id", "timestamp", "provider", "model", "username",
+		"id", "timestamp", "session_id", "provider", "model", "username",
 		"client_name", "client_version", "service_tier",
 		"tokens_input", "tokens_output", "tokens_cached", "tokens_cached_creation",
 		"latency_ms", "cost_usd", "streaming",
@@ -249,6 +310,7 @@ func WriteCSV(w io.Writer, rows []Row) error {
 		_ = cw.Write([]string{
 			r.ID,
 			r.Timestamp.UTC().Format(time.RFC3339),
+			r.SessionID,
 			r.Provider, r.Model, r.Username, r.ClientName, r.ClientVersion, r.ServiceTier,
 			strconv.FormatInt(r.TokensInput, 10),
 			strconv.FormatInt(r.TokensOutput, 10),

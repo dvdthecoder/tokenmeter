@@ -65,6 +65,7 @@ func main() {
 		cmdPurge(),
 		cmdExport(),
 		cmdInsights(),
+		cmdDashboard(),
 		cmdScaffold(),
 		cmdCert(),
 	)
@@ -148,6 +149,46 @@ func cmdStart() *cobra.Command {
 				}
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(ins)
+			})
+			mux.HandleFunc("/dashboard", func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				fmt.Fprint(w, dashboardHTML)
+			})
+			mux.HandleFunc("/api/v1/events", func(w http.ResponseWriter, r *http.Request) {
+				db, err := storage.Open(sqlitesink.DefaultDBPath())
+				if err != nil {
+					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
+					return
+				}
+				defer db.Close()
+				opts := parseQueryOpts(r)
+				rows, err := db.Query(opts)
+				if err != nil {
+					http.Error(w, "query failed", http.StatusInternalServerError)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Access-Control-Allow-Origin", "")
+				if rows == nil {
+					rows = []storage.Row{}
+				}
+				json.NewEncoder(w).Encode(rows)
+			})
+			mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
+				db, err := storage.Open(sqlitesink.DefaultDBPath())
+				if err != nil {
+					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
+					return
+				}
+				defer db.Close()
+				opts := parseQueryOpts(r)
+				stats, err := db.QueryStats(opts)
+				if err != nil {
+					http.Error(w, "query failed", http.StatusInternalServerError)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(stats)
 			})
 			mux.Handle("/", p)
 
@@ -749,3 +790,167 @@ func runCmd(name string, args ...string) error {
 func errNotYet(cmd string) error {
 	return fmt.Errorf("%q is not yet implemented (coming in a future release)", cmd)
 }
+
+// parseQueryOpts converts URL query params (?last=6h&limit=200) into QueryOpts.
+func parseQueryOpts(r *http.Request) storage.QueryOpts {
+	q := r.URL.Query()
+	opts := storage.QueryOpts{Limit: 500}
+	if last := q.Get("last"); last != "" {
+		if d, err := parseDuration(last); err == nil {
+			opts.Since = time.Now().Add(-d)
+		}
+	}
+	if lim := q.Get("limit"); lim != "" {
+		if n, err := strconv.Atoi(lim); err == nil && n > 0 {
+			opts.Limit = n
+		}
+	}
+	if m := q.Get("model"); m != "" {
+		opts.Model = m
+	}
+	if u := q.Get("user"); u != "" {
+		opts.User = u
+	}
+	return opts
+}
+
+func cmdDashboard() *cobra.Command {
+	return &cobra.Command{
+		Use:   "dashboard",
+		Short: "Open the web dashboard (requires proxy to be running)",
+		Run: func(cmd *cobra.Command, args []string) {
+			addr := config.Default().Proxy.Listen
+			url := "http://" + addr + "/dashboard"
+			fmt.Printf("Dashboard: %s\n", url)
+			// Try to open in browser on supported platforms.
+			_ = exec.Command("open", url).Start()
+		},
+	}
+}
+
+const dashboardHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>tokenmeter</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;font-size:13px}
+header{padding:14px 24px;border-bottom:1px solid #21262d;display:flex;align-items:center;gap:10px}
+header h1{font-size:15px;font-weight:600;color:#f0f6fc;letter-spacing:-.3px}
+.live{background:#1a7f37;color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+#updated{margin-left:auto;font-size:11px;color:#6e7681}
+.controls{padding:10px 24px;border-bottom:1px solid #21262d;display:flex;gap:6px;align-items:center}
+.controls span{font-size:11px;color:#6e7681;margin-right:4px}
+.btn{padding:3px 10px;border:1px solid #30363d;background:#161b22;color:#c9d1d9;border-radius:5px;cursor:pointer;font-size:12px;transition:background .1s}
+.btn:hover{background:#21262d}
+.btn.on{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:#21262d;border-bottom:1px solid #21262d}
+.stat{background:#0d1117;padding:14px 20px}
+.stat .lbl{font-size:10px;color:#6e7681;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.stat .val{font-size:22px;font-weight:600;color:#e6edf3;font-variant-numeric:tabular-nums}
+.stat .sub{font-size:10px;color:#6e7681;margin-top:3px}
+.tbl-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:7px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#6e7681;border-bottom:1px solid #21262d;white-space:nowrap;background:#0d1117;position:sticky;top:0}
+td{padding:7px 12px;border-bottom:1px solid #161b22;white-space:nowrap;font-variant-numeric:tabular-nums}
+tr:hover td{background:#161b22}
+.mono{font-family:'SF Mono',Consolas,monospace;font-size:11px}
+.sess{color:#58a6ff;font-family:monospace;font-size:11px;cursor:default}
+.green{color:#3fb950}
+.chip{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;background:#161b22;border:1px solid #21262d;font-family:monospace}
+.empty{text-align:center;color:#6e7681;padding:48px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>tokenmeter</h1>
+  <span class="live">&#9679; live</span>
+  <span id="updated"></span>
+</header>
+<div class="controls">
+  <span>LAST</span>
+  <button class="btn" onclick="pick(this,'1h')">1h</button>
+  <button class="btn on" onclick="pick(this,'6h')">6h</button>
+  <button class="btn" onclick="pick(this,'24h')">24h</button>
+  <button class="btn" onclick="pick(this,'7d')">7d</button>
+  <button class="btn" onclick="pick(this,'30d')">30d</button>
+</div>
+<div class="stats">
+  <div class="stat"><div class="lbl">Requests</div><div class="val" id="s-req">—</div><div class="sub" id="s-sess"></div></div>
+  <div class="stat"><div class="lbl">Input tokens</div><div class="val" id="s-in">—</div></div>
+  <div class="stat"><div class="lbl">Output tokens</div><div class="val" id="s-out">—</div></div>
+  <div class="stat"><div class="lbl">Cached tokens</div><div class="val" id="s-cache">—</div></div>
+  <div class="stat"><div class="lbl">Total cost</div><div class="val green" id="s-cost">—</div></div>
+  <div class="stat"><div class="lbl">Avg latency</div><div class="val" id="s-lat">—</div></div>
+</div>
+<div class="tbl-wrap">
+<table>
+  <thead><tr>
+    <th>Time</th><th>Session</th><th>Client</th><th>Model</th>
+    <th>In</th><th>Out</th><th>Cached</th><th>Cost</th><th>Latency</th><th>User</th>
+  </tr></thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+<script>
+let win='6h';
+function pick(btn,w){
+  document.querySelectorAll('.btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  win=w;refresh();
+}
+function n(v){
+  if(v>=1e9)return(v/1e9).toFixed(1)+'B';
+  if(v>=1e6)return(v/1e6).toFixed(1)+'M';
+  if(v>=1e3)return(v/1e3).toFixed(1)+'K';
+  return''+v;
+}
+function cost(c){return c===0?'$0.000000':'$'+c.toFixed(6)}
+function lat(ms){return ms>=1000?(ms/1000).toFixed(1)+'s':ms+'ms'}
+function sess(id){
+  if(!id)return'<span style="color:#6e7681">—</span>';
+  const s=id.length>14?id.slice(0,14)+'…':id;
+  return'<span class="sess" title="'+id+'">'+s+'</span>';
+}
+async function refresh(){
+  try{
+    const[sr,er]=await Promise.all([
+      fetch('/api/v1/stats?last='+win),
+      fetch('/api/v1/events?last='+win+'&limit=300')
+    ]);
+    const s=await sr.json(),ev=await er.json();
+    document.getElementById('s-req').textContent=n(s.requests||0);
+    document.getElementById('s-sess').textContent=s.sessions>0?s.sessions+' session'+(s.sessions!==1?'s':''):'';
+    document.getElementById('s-in').textContent=n(s.tokens_input||0);
+    document.getElementById('s-out').textContent=n(s.tokens_output||0);
+    document.getElementById('s-cache').textContent=n(s.tokens_cached||0);
+    document.getElementById('s-cost').textContent=cost(s.cost_usd||0);
+    document.getElementById('s-lat').textContent=s.requests>0?lat(Math.round(s.latency_ms_avg||0)):'—';
+    document.getElementById('updated').textContent='Updated '+new Date().toLocaleTimeString();
+    const tb=document.getElementById('tbody');
+    if(!ev||ev.length===0){
+      tb.innerHTML='<tr><td colspan="10" class="empty">No events in window</td></tr>';
+      return;
+    }
+    tb.innerHTML=ev.map(e=>` + "`" + `
+      <tr>
+        <td class="mono">${new Date(e.timestamp).toLocaleTimeString()}</td>
+        <td>${sess(e.session_id)}</td>
+        <td><span class="chip">${e.client_name||'—'}</span></td>
+        <td class="mono">${e.model||'—'}</td>
+        <td>${n(e.tokens_input)}</td>
+        <td>${n(e.tokens_output)}</td>
+        <td>${n(e.tokens_cached)}</td>
+        <td class="green">${cost(e.cost_usd)}</td>
+        <td>${lat(e.latency_ms)}</td>
+        <td>${e.username||'—'}</td>
+      </tr>` + "`" + `).join('');
+  }catch(e){console.error(e)}
+}
+refresh();
+setInterval(refresh,10000);
+</script>
+</body>
+</html>`

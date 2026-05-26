@@ -27,9 +27,10 @@ import (
 type contextKey int
 
 const (
-	ctxProvider  contextKey = iota
-	ctxRequestID contextKey = iota
-	ctxStartTime contextKey = iota
+	ctxProvider   contextKey = iota
+	ctxRequestID  contextKey = iota
+	ctxStartTime  contextKey = iota
+	ctxSessionID  contextKey = iota
 )
 
 // Proxy is an http.Handler that intercepts LLM API traffic.
@@ -92,6 +93,7 @@ func (p *Proxy) director(req *http.Request) {
 	ctx = context.WithValue(ctx, ctxProvider, provider)
 	ctx = context.WithValue(ctx, ctxRequestID, uuid.New().String())
 	ctx = context.WithValue(ctx, ctxStartTime, time.Now())
+	ctx = context.WithValue(ctx, ctxSessionID, extractSessionID(req))
 	*req = *req.WithContext(ctx)
 
 	configuredBase := p.cfg.Proxy.Upstreams[provider.Name()]
@@ -123,6 +125,7 @@ func (p *Proxy) modifyResponse(resp *http.Response) error {
 		return nil
 	}
 	requestID, _ := ctx.Value(ctxRequestID).(string)
+	sessionID, _ := ctx.Value(ctxSessionID).(string)
 	startTime, _ := ctx.Value(ctxStartTime).(time.Time)
 
 	// Decompress if upstream sent gzip despite our Accept-Encoding: identity.
@@ -145,6 +148,7 @@ func (p *Proxy) modifyResponse(resp *http.Response) error {
 		latency := time.Since(startTime).Milliseconds()
 		event := providers.UsageEvent{
 			RequestID:            requestID,
+			SessionID:            sessionID,
 			ServiceID:            p.cfg.Proxy.ServiceID,
 			Username:             username,
 			ClientName:           clientName,

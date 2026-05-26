@@ -75,6 +75,23 @@ func versionFromUA(ua, prefix string) string {
 	return rest[:end]
 }
 
+// extractSessionID reads well-known session/conversation headers sent by AI
+// coding tools. Returns empty string when none is present.
+func extractSessionID(req *http.Request) string {
+	for _, h := range []string{
+		"X-Session-Id",
+		"X-Client-Session-Id",
+		"Anthropic-Session-Id",
+		"X-Conversation-Id",
+		"X-App-Session-Id",
+	} {
+		if v := req.Header.Get(h); v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
 // systemUsername returns the OS user running the process.
 // Resolution order: TOKENMETER_USER env var → USER → USERNAME (Windows) → hostname.
 func systemUsername() string {
