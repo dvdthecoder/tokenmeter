@@ -15,7 +15,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 7 | v0.7 | Per-user value | ✅ Done |
 | 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | ✅ Done |
 | 9 | v0.9 | Local SLM insights (on-device, Ollama) | ✅ Done |
-| 10 | v0.10 | VS Code extension — status bar + usage dashboard | Planned |
+| 10 | v0.10 | VS Code extension — status bar + usage dashboard | ✅ Done |
 | 11 | v0.11 | Central collection hardening + GDPR facade | Planned |
 | 12 | v0.12 | Plugin scaffold + webhook + cost alerts | Planned |
 | 13 | v0.13 | Integration test harness — end-to-end smoke tests | Planned |
@@ -107,16 +107,16 @@ Enterprise model coverage — the two largest sources of LLM traffic not yet cap
 - `insights.auto_generate: daily` — daemon starts a background goroutine firing a 24h ticker
 - Grafana: Infinity datasource provisioned, Insights row + text panel with usage instructions added to dashboard
 
-## Planned — Iteration 10 — VS Code extension (v0.10)
+## ✅ Iteration 10 — VS Code extension (v0.10)
 
 Surface data where developers already are — inside the editor, without opening a terminal or Grafana.
 
-- TypeScript extension in `extensions/vscode/`
-- Status bar item: live session token count + estimated cost, updates after each completion
-- Webview dashboard panel: usage by model + cost over time (reads local SQLite via `tokenmeter query` subprocess — no native deps in extension)
-- Auto-starts tokenmeter daemon if not running on startup
-
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-10)
+- TypeScript extension in `extensions/vscode/` (esbuild-bundled, 13.6 KB, zero runtime deps)
+- Status bar item: `$(graph-line) 1.2k tokens · $0.0042` — polls every 10 s, click to open dashboard
+- Webview dashboard panel: tokens by model (bar), cost over time (line), recent requests table — all via `tokenmeter query --format json` subprocess
+- Auto-starts tokenmeter daemon on VS Code startup if not already running
+- Three commands: `Tokenmeter: Open Dashboard`, `Start Daemon`, `Refresh Status Bar`
+- Config: `tokenmeter.binaryPath`, `tokenmeter.pollIntervalSeconds`, `tokenmeter.autoStartDaemon`
 
 ## Planned — Iteration 11 — Central collection hardening + GDPR facade (v0.11)
 

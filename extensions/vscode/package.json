@@ -1,0 +1,68 @@
+{
+  "name": "tokenmeter",
+  "displayName": "Tokenmeter — Token Usage",
+  "description": "Live token usage and cost tracking for AI coding tools (Claude Code, Copilot, Codex, Cline)",
+  "version": "0.10.0",
+  "publisher": "dvdthecoder",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dvdthecoder/tokenmeter"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "keywords": ["ai", "tokens", "cost", "usage", "anthropic", "openai", "copilot"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "tokenmeter.openDashboard",
+        "title": "Tokenmeter: Open Dashboard"
+      },
+      {
+        "command": "tokenmeter.startDaemon",
+        "title": "Tokenmeter: Start Daemon"
+      },
+      {
+        "command": "tokenmeter.refresh",
+        "title": "Tokenmeter: Refresh Status Bar"
+      }
+    ],
+    "configuration": {
+      "title": "Tokenmeter",
+      "properties": {
+        "tokenmeter.binaryPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the tokenmeter binary. Leave empty to use PATH."
+        },
+        "tokenmeter.pollIntervalSeconds": {
+          "type": "number",
+          "default": 10,
+          "minimum": 5,
+          "description": "How often (seconds) to refresh the status bar token count."
+        },
+        "tokenmeter.autoStartDaemon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start the tokenmeter daemon if it is not running when VS Code opens."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "watch": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "compile": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.4.0"
+  }
+}
