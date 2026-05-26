@@ -52,6 +52,7 @@ nav:
     - Installation: getting-started/installation.md
     - Quickstart: getting-started/quickstart.md
     - Configuration: getting-started/configuration.md
+    - Local Visualization: getting-started/local-visualization.md
     - Central Collector: getting-started/collector.md
   - Supported Tools:
     - Claude Code: tools/claude-code.md
@@ -67,4 +68,5 @@ nav:
     - Backend Adapters: plugins/backends.md
   - CLI Reference: cli.md
   - Privacy & GDPR: privacy.md
+  - Development: development.md
   - Roadmap: roadmap.md
