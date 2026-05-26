@@ -75,10 +75,21 @@ func versionFromUA(ua, prefix string) string {
 	return rest[:end]
 }
 
+// detectClientName returns the client name from request headers alone (no response needed).
+// Used for synthetic session key derivation before the response is available.
+func detectClientName(req *http.Request) string {
+	name, _ := detectClient(req)
+	return name
+}
+
 // extractSessionID reads well-known session/conversation headers sent by AI
 // coding tools. Returns empty string when none is present.
 func extractSessionID(req *http.Request) string {
 	for _, h := range []string{
+		// Claude Code CLI (confirmed via binary string analysis)
+		"X-Claude-Code-Session-Id",
+		"X-Claude-Remote-Session-Id",
+		// Generic / other tools
 		"X-Session-Id",
 		"X-Client-Session-Id",
 		"Anthropic-Session-Id",

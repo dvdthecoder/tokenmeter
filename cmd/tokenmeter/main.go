@@ -125,6 +125,15 @@ func cmdStart() *cobra.Command {
 				slog.Info("sink enabled", "sink", name)
 			}
 
+			// Resolve the active SQLite path so dashboard/API handlers read
+			// the same file the sqlite sink writes to, not always the default.
+			activeSQLitePath := sqlitesink.DefaultDBPath()
+			if sc, ok := cfg.Sinks["sqlite"]; ok {
+				if p, _ := sc.Options["path"].(string); p != "" {
+					activeSQLitePath = p
+				}
+			}
+
 			p := proxy.New(cfg)
 			mux := http.NewServeMux()
 			mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +141,7 @@ func cmdStart() *cobra.Command {
 				fmt.Fprintln(w, "ok")
 			})
 			mux.HandleFunc("/insights/latest", func(w http.ResponseWriter, r *http.Request) {
-				db, err := storage.Open(sqlitesink.DefaultDBPath())
+				db, err := storage.Open(activeSQLitePath)
 				if err != nil {
 					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 					return
@@ -155,7 +164,7 @@ func cmdStart() *cobra.Command {
 				fmt.Fprint(w, dashboardHTML)
 			})
 			mux.HandleFunc("/api/v1/events", func(w http.ResponseWriter, r *http.Request) {
-				db, err := storage.Open(sqlitesink.DefaultDBPath())
+				db, err := storage.Open(activeSQLitePath)
 				if err != nil {
 					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 					return
@@ -175,7 +184,7 @@ func cmdStart() *cobra.Command {
 				json.NewEncoder(w).Encode(rows)
 			})
 			mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
-				db, err := storage.Open(sqlitesink.DefaultDBPath())
+				db, err := storage.Open(activeSQLitePath)
 				if err != nil {
 					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 					return
@@ -223,7 +232,7 @@ func cmdStart() *cobra.Command {
 					ticker := time.NewTicker(24 * time.Hour)
 					defer ticker.Stop()
 					for range ticker.C {
-						db, err := storage.Open(sqlitesink.DefaultDBPath())
+						db, err := storage.Open(activeSQLitePath)
 						if err != nil {
 							slog.Warn("insights: open db", "err", err)
 							continue

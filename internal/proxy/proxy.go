@@ -15,6 +15,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,15 +34,47 @@ const (
 	ctxSessionID  contextKey = iota
 )
 
+// sessionTracker assigns synthetic session IDs to clients that don't send a
+// session header (e.g. Claude Code CLI). Requests from the same key within
+// sessionTimeout are grouped into one session; inactivity resets the bucket.
+type sessionTracker struct {
+	mu      sync.Mutex
+	entries map[string]*sessionEntry
+}
+
+type sessionEntry struct {
+	id       string
+	lastSeen time.Time
+}
+
+const sessionTimeout = 30 * time.Minute
+
+func (t *sessionTracker) get(key string) string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	now := time.Now()
+	if e, ok := t.entries[key]; ok && now.Sub(e.lastSeen) < sessionTimeout {
+		e.lastSeen = now
+		return e.id
+	}
+	id := "syn-" + uuid.New().String()[:8]
+	t.entries[key] = &sessionEntry{id: id, lastSeen: now}
+	return id
+}
+
 // Proxy is an http.Handler that intercepts LLM API traffic.
 type Proxy struct {
-	cfg *config.Config
-	rp  *httputil.ReverseProxy
+	cfg      *config.Config
+	rp       *httputil.ReverseProxy
+	sessions *sessionTracker
 }
 
 // New creates a Proxy from the given config.
 func New(cfg *config.Config) *Proxy {
-	p := &Proxy{cfg: cfg}
+	p := &Proxy{
+		cfg:      cfg,
+		sessions: &sessionTracker{entries: make(map[string]*sessionEntry)},
+	}
 	p.rp = &httputil.ReverseProxy{
 		Director:       p.director,
 		ModifyResponse: p.modifyResponse,
@@ -89,11 +122,18 @@ func (p *Proxy) director(req *http.Request) {
 		return
 	}
 
+	sessionID := extractSessionID(req)
+	if sessionID == "" {
+		// No explicit session header — derive a synthetic one so consecutive
+		// requests from the same user/client are grouped in the dashboard.
+		sessionID = p.sessions.get(systemUsername() + "|" + detectClientName(req))
+	}
+
 	ctx := req.Context()
 	ctx = context.WithValue(ctx, ctxProvider, provider)
 	ctx = context.WithValue(ctx, ctxRequestID, uuid.New().String())
 	ctx = context.WithValue(ctx, ctxStartTime, time.Now())
-	ctx = context.WithValue(ctx, ctxSessionID, extractSessionID(req))
+	ctx = context.WithValue(ctx, ctxSessionID, sessionID)
 	*req = *req.WithContext(ctx)
 
 	configuredBase := p.cfg.Proxy.Upstreams[provider.Name()]
