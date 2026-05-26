@@ -110,13 +110,13 @@ func (s *Sink) initInstruments(meter otelmetric.Meter) error {
 	}
 	if s.costUSD, err = meter.Float64Counter("llm.cost.usd",
 		otelmetric.WithDescription("Estimated cost in USD"),
-		otelmetric.WithUnit("USD"),
+		otelmetric.WithUnit("{USD}"),
 	); err != nil {
 		return fmt.Errorf("otel: register llm.cost.usd: %w", err)
 	}
 	if s.latencyMS, err = meter.Int64Histogram("llm.latency.ms",
 		otelmetric.WithDescription("Request latency in milliseconds"),
-		otelmetric.WithUnit("ms"),
+		otelmetric.WithUnit("{ms}"),
 	); err != nil {
 		return fmt.Errorf("otel: register llm.latency.ms: %w", err)
 	}
