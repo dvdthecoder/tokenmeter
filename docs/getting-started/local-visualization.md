@@ -1,10 +1,11 @@
 # Visualize locally
 
-Three ways to see your captured token data, in order of setup complexity:
+Four ways to see your captured token data, in order of setup complexity:
 
 | Option | Requires | What you get |
 |---|---|---|
 | [Terminal query](#terminal-query) | Nothing extra | Table / JSON / CSV in the shell |
+| [Built-in web dashboard](#built-in-web-dashboard) | Proxy running | Live browser dashboard, auto-refresh |
 | [VS Code extension](#vs-code-extension) | tokenmeter VS Code extension | Live status bar + dashboard webview |
 | [Grafana dashboard](#grafana-dashboard) | Docker | Full metrics dashboard with charts |
 
@@ -19,11 +20,11 @@ tokenmeter query --last 1h
 ```
 
 ```
-TIME                  MODEL              CLIENT                USER          IN     OUT    CACHED    COST
-2026-05-26T09:14:22Z  claude-sonnet-4-6  claude-code-cli@2.1   alice         142    75     30976     $0.009572
-2026-05-26T09:11:05Z  gpt-4o             codex-cli@1.2         alice         88     32     0         $0.001440
-──────────────────────────────────────────────────────────────────────────────────────────────
-TOTAL (2)                                                                     230    107    30976     $0.011012
+TIME                  SESSION       MODEL              CLIENT                USER     IN     OUT    CACHED    COST
+2026-05-26T09:14:22Z  a3f9c2b1e7d8  claude-sonnet-4-6  claude-code-cli@2.1   alice    142    75     30976     $0.009572
+2026-05-26T09:11:05Z  —             gpt-4o             codex-cli@1.2         alice    88     32     0         $0.001440
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+TOTAL (2)                                                                              230    107    30976     $0.011012
 ```
 
 ### Filters and flags
@@ -56,6 +57,49 @@ Or use the dedicated export command (includes all fields):
 tokenmeter export --format csv > usage.csv
 tokenmeter export --format json > usage.json
 ```
+
+---
+
+## Built-in web dashboard
+
+While the proxy is running, open the dashboard in a browser:
+
+```sh
+tokenmeter dashboard
+# → http://127.0.0.1:4191/dashboard
+```
+
+Or navigate to `http://127.0.0.1:4191/dashboard` directly.
+
+The dashboard is served by the proxy itself — no extra process, no Docker, no external dependencies.
+
+**What it shows:**
+
+- Summary cards: requests, input / output / cached tokens, total cost, avg latency, session count
+- Per-request events table with session ID, client, model, tokens, cost, latency, and user
+- Time-window picker: 1 h / 6 h / 24 h / 7 d / 30 d
+- Auto-refresh every 10 seconds
+
+**Session IDs** are captured from headers sent by AI tools (`X-Session-Id`, `Anthropic-Session-Id`, `X-Conversation-Id`, etc.) and group related requests from the same conversation. They appear truncated in the table; hover to see the full value.
+
+The dashboard is backed by two JSON endpoints you can also query directly:
+
+```sh
+# Aggregate stats for the last 6 hours
+curl http://127.0.0.1:4191/api/v1/stats?last=6h | jq .
+
+# Raw event list (last 24 h, up to 300 rows)
+curl "http://127.0.0.1:4191/api/v1/events?last=24h&limit=300" | jq .
+```
+
+Both endpoints accept the same filter params as `tokenmeter query`:
+
+| Param | Example | Description |
+|---|---|---|
+| `last` | `6h`, `24h`, `7d` | Time window |
+| `limit` | `300` | Max rows returned |
+| `model` | `claude-sonnet-4-6` | Filter by model |
+| `user` | `alice` | Filter by username |
 
 ---
 

@@ -12,6 +12,7 @@ tokenmeter is **content-blind by design**. A `UsageEvent` contains only metadata
 | Latency | `1706 ms` | ✅ |
 | Timestamp | `2026-05-18T09:14:22Z` | ✅ |
 | Client name | `claude-code-cli@2.1.142` | ✅ |
+| Session ID | `a3f9c2b1e7d8…` | ✅ (from request headers, empty when not sent) |
 | Username | `alice` | ✅ (hashed optional) |
 | Service ID | SHA-256 prefix | ✅ (hashed by default) |
 | **Prompt text** | — | ❌ Never |

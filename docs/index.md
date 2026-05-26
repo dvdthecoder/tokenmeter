@@ -47,6 +47,7 @@ Every proxied request produces one `UsageEvent`:
 | Latency | `1 706 ms` |
 | Client | `claude-code-cli@2.1.142` |
 | User | `abhishekdwivedi` |
+| Session ID | `a3f9c2b1e7d8…` (from request headers, groups a conversation) |
 
 Prompts and responses are **never stored**.
 

@@ -53,8 +53,8 @@ status:  running (pid 12345)
 log:     ~/Library/Application Support/tokenmeter/tokenmeter.log
 
 recent events:
-TIME                  MODEL              CLIENT                USER     IN    OUT   CACHED    COST
-2026-05-18T09:14:22Z  claude-sonnet-4-6  claude-code-cli@2.1   alice    3     12    30976     $0.009482
+TIME                  SESSION       MODEL              CLIENT                USER     IN    OUT   CACHED    COST
+2026-05-18T09:14:22Z  a3f9c2b1e7d8  claude-sonnet-4-6  claude-code-cli@2.1   alice    3     12    30976     $0.009482
 ```
 
 ---
@@ -166,6 +166,20 @@ tokenmeter export --format csv > events.csv
 |---|---|---|
 | `--format` | `json` | Output format: `json`, `csv` |
 | `--db` | default path | Path to SQLite database |
+
+---
+
+## `tokenmeter dashboard`
+
+Open the built-in web dashboard in a browser. The proxy must be running.
+
+```sh
+tokenmeter dashboard
+```
+
+Prints the URL (`http://127.0.0.1:4191/dashboard`) and tries to open it automatically. You can also navigate there manually while the proxy is running.
+
+The dashboard auto-refreshes every 10 seconds. Use the time-window buttons (1 h / 6 h / 24 h / 7 d / 30 d) to change the query window.
 
 ---
 
