@@ -155,19 +155,21 @@ type Row struct {
 	TokensCached         int64     `json:"tokens_cached"`
 	TokensCachedCreation int64     `json:"tokens_cached_creation"`
 	LatencyMS            int64     `json:"latency_ms"`
+	TokensPerSec         float64   `json:"tokens_per_sec"`
 	CostUSD              float64   `json:"cost_usd"`
 	Streaming            bool      `json:"streaming"`
 }
 
 // Stats holds aggregate metrics for a query window.
 type Stats struct {
-	Requests      int     `json:"requests"`
-	TokensInput   int64   `json:"tokens_input"`
-	TokensOutput  int64   `json:"tokens_output"`
-	TokensCached  int64   `json:"tokens_cached"`
-	CostUSD       float64 `json:"cost_usd"`
-	LatencyMSAvg  float64 `json:"latency_ms_avg"`
-	Sessions      int     `json:"sessions"`
+	Requests        int     `json:"requests"`
+	TokensInput     int64   `json:"tokens_input"`
+	TokensOutput    int64   `json:"tokens_output"`
+	TokensCached    int64   `json:"tokens_cached"`
+	CostUSD         float64 `json:"cost_usd"`
+	LatencyMSAvg    float64 `json:"latency_ms_avg"`
+	TokensPerSecAvg float64 `json:"tokens_per_sec_avg"`
+	Sessions        int     `json:"sessions"`
 }
 
 // Query returns events matching opts, ordered by timestamp descending.
@@ -202,6 +204,9 @@ func (d *DB) Query(opts QueryOpts) ([]Row, error) {
 		}
 		r.Timestamp, _ = time.Parse(time.RFC3339, tsStr)
 		r.Streaming = streaming != 0
+		if r.LatencyMS > 0 {
+			r.TokensPerSec = float64(r.TokensOutput) / (float64(r.LatencyMS) / 1000.0)
+		}
 		out = append(out, r)
 	}
 	return out, rows.Err()
@@ -243,18 +248,21 @@ func (d *DB) QueryStats(opts QueryOpts) (Stats, error) {
 		       COALESCE(SUM(tokens_cached), 0),
 		       COALESCE(SUM(cost_usd), 0),
 		       COALESCE(AVG(latency_ms), 0),
+		       CASE WHEN SUM(latency_ms) > 0
+		            THEN SUM(tokens_output) / (SUM(latency_ms) / 1000.0)
+		            ELSE 0 END,
 		       COUNT(DISTINCT CASE WHEN session_id != '' THEN session_id END)
 		FROM events`+where, args...)
 	var s Stats
 	err := row.Scan(&s.Requests, &s.TokensInput, &s.TokensOutput, &s.TokensCached,
-		&s.CostUSD, &s.LatencyMSAvg, &s.Sessions)
+		&s.CostUSD, &s.LatencyMSAvg, &s.TokensPerSecAvg, &s.Sessions)
 	return s, err
 }
 
 // WriteTable renders rows as a human-readable aligned table to w.
 func WriteTable(w io.Writer, rows []Row) {
 	tw := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "TIME\tSESSION\tMODEL\tCLIENT\tUSER\tIN\tOUT\tCACHED\tCOST")
+	fmt.Fprintln(tw, "TIME\tSESSION\tMODEL\tCLIENT\tUSER\tIN\tOUT\tCACHED\tTOK/S\tCOST")
 	var totalIn, totalOut, totalCached int64
 	var totalCost float64
 	for _, r := range rows {
@@ -269,18 +277,22 @@ func WriteTable(w io.Writer, rows []Row) {
 		if sess == "" {
 			sess = "—"
 		}
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t$%.6f\n",
+		tps := "—"
+		if r.TokensPerSec > 0 {
+			tps = fmt.Sprintf("%.1f", r.TokensPerSec)
+		}
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s\t$%.6f\n",
 			r.Timestamp.UTC().Format("2006-01-02T15:04:05Z"),
 			sess, r.Model, client, r.Username,
-			r.TokensInput, r.TokensOutput, r.TokensCached, r.CostUSD,
+			r.TokensInput, r.TokensOutput, r.TokensCached, tps, r.CostUSD,
 		)
 		totalIn += r.TokensInput
 		totalOut += r.TokensOutput
 		totalCached += r.TokensCached
 		totalCost += r.CostUSD
 	}
-	fmt.Fprintln(tw, strings.Repeat("─", 8)+"\t\t"+strings.Repeat("─", 8)+"\t\t\t\t\t\t")
-	fmt.Fprintf(tw, "TOTAL (%d)\t\t\t\t\t%d\t%d\t%d\t$%.6f\n",
+	fmt.Fprintln(tw, strings.Repeat("─", 8)+"\t\t"+strings.Repeat("─", 8)+"\t\t\t\t\t\t\t")
+	fmt.Fprintf(tw, "TOTAL (%d)\t\t\t\t\t%d\t%d\t%d\t\t$%.6f\n",
 		len(rows), totalIn, totalOut, totalCached, totalCost)
 	tw.Flush()
 }
@@ -299,7 +311,7 @@ func WriteCSV(w io.Writer, rows []Row) error {
 		"id", "timestamp", "session_id", "provider", "model", "username",
 		"client_name", "client_version", "service_tier",
 		"tokens_input", "tokens_output", "tokens_cached", "tokens_cached_creation",
-		"latency_ms", "cost_usd", "streaming",
+		"latency_ms", "tokens_per_sec", "cost_usd", "streaming",
 	})
 	for _, r := range rows {
 		streaming := "false"
@@ -316,6 +328,7 @@ func WriteCSV(w io.Writer, rows []Row) error {
 			strconv.FormatInt(r.TokensCached, 10),
 			strconv.FormatInt(r.TokensCachedCreation, 10),
 			strconv.FormatInt(r.LatencyMS, 10),
+			strconv.FormatFloat(r.TokensPerSec, 'f', 2, 64),
 			strconv.FormatFloat(r.CostUSD, 'f', 8, 64),
 			streaming,
 		})

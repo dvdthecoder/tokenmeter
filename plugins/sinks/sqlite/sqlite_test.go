@@ -159,6 +159,48 @@ func TestPurgeUserNotFound(t *testing.T) {
 	}
 }
 
+func TestTokensPerSec(t *testing.T) {
+	db := openMemDB(t)
+	_ = db.Insert(testEvent) // LatencyMS=1500, TokensOutput=50 → 33.33 tok/s
+
+	rows, err := db.Query(storage.QueryOpts{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := rows[0]
+	want := float64(50) / 1.5 // ~33.33
+	if r.TokensPerSec < 33.0 || r.TokensPerSec > 34.0 {
+		t.Errorf("TokensPerSec: got %.2f, want ~%.2f", r.TokensPerSec, want)
+	}
+}
+
+func TestTokensPerSecZeroLatency(t *testing.T) {
+	db := openMemDB(t)
+	e := testEvent
+	e.RequestID = "req-zero-lat"
+	e.LatencyMS = 0
+	_ = db.Insert(e)
+
+	rows, _ := db.Query(storage.QueryOpts{})
+	if rows[0].TokensPerSec != 0 {
+		t.Errorf("expected 0 tok/s for zero latency, got %.2f", rows[0].TokensPerSec)
+	}
+}
+
+func TestQueryStatsTokensPerSec(t *testing.T) {
+	db := openMemDB(t)
+	_ = db.Insert(testEvent) // 50 out / 1500ms
+
+	stats, err := db.QueryStats(storage.QueryOpts{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// SUM(tokens_output)=50, SUM(latency_ms)=1500 → 50/1.5 ≈ 33.33
+	if stats.TokensPerSecAvg < 33.0 || stats.TokensPerSecAvg > 34.0 {
+		t.Errorf("TokensPerSecAvg: got %.2f, want ~33.33", stats.TokensPerSecAvg)
+	}
+}
+
 func TestWriteTable(t *testing.T) {
 	db := openMemDB(t)
 	_ = db.Insert(testEvent)
@@ -172,6 +214,9 @@ func TestWriteTable(t *testing.T) {
 	}
 	if !strings.Contains(out, "TOTAL") {
 		t.Errorf("table output missing TOTAL: %s", out)
+	}
+	if !strings.Contains(out, "TOK/S") {
+		t.Errorf("table output missing TOK/S column: %s", out)
 	}
 }
 
@@ -188,8 +233,8 @@ func TestWriteCSV(t *testing.T) {
 	if !strings.Contains(out, "claude-sonnet-4-6") {
 		t.Errorf("csv missing model: %s", out)
 	}
-	if !strings.Contains(out, "tokens_input") {
-		t.Errorf("csv missing header: %s", out)
+	if !strings.Contains(out, "tokens_per_sec") {
+		t.Errorf("csv missing tokens_per_sec header: %s", out)
 	}
 }
 
