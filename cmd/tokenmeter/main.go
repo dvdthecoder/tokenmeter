@@ -134,6 +134,13 @@ func cmdStart() *cobra.Command {
 				}
 			}
 
+			if cfg.Privacy.DataMinimisation {
+				slog.Warn("data_minimisation enabled — username, session, client, service_id stripped before sinks")
+				if cfg.Privacy.HashUser {
+					slog.Warn("data_minimisation + hash_user both set; hash_user has no effect in minimisation mode")
+				}
+			}
+
 			p := proxy.New(cfg)
 			mux := http.NewServeMux()
 			mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

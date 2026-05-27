@@ -42,3 +42,8 @@ func Get(name string) (SinkPlugin, bool) {
 func All() map[string]SinkPlugin {
 	return registry
 }
+
+// Unregister removes a sink by name. Used in tests.
+func Unregister(name string) {
+	delete(registry, name)
+}
