@@ -112,13 +112,27 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (p *Proxy) director(req *http.Request) {
 	provider, ok := providers.Detect(req)
 	if !ok {
-		// HEAD / is a Claude Code health check — suppress the noise.
-		if req.Method != http.MethodHead || req.URL.Path != "/" {
-			slog.Warn("no provider matched",
-				"host", req.Host, "path", req.URL.Path,
-				"tip", "set ANTHROPIC_BASE_URL or OPENAI_BASE_URL=http://127.0.0.1:4191",
-			)
+		// Anthropic-destined requests that slip through provider detection
+		// (OAuth, model listing, any path without anthropic-version header) must
+		// still reach the real API. Forward transparently — no usage is captured.
+		if req.Header.Get("anthropic-version") != "" || req.Header.Get("x-api-key") != "" {
+			base := p.cfg.Proxy.Upstreams["anthropic"]
+			if base == "" {
+				base = "https://api.anthropic.com"
+			}
+			if upstream, err := url.Parse(base); err == nil {
+				req.URL.Scheme = upstream.Scheme
+				req.URL.Host = upstream.Host
+				req.Host = upstream.Host
+				req.Header.Del("X-Forwarded-For")
+				slog.Debug("anthropic passthrough (no provider match)", "path", req.URL.Path)
+			}
+			return
 		}
+		slog.Warn("no provider matched",
+			"host", req.Host, "path", req.URL.Path,
+			"tip", "set ANTHROPIC_BASE_URL or OPENAI_BASE_URL=http://127.0.0.1:4191",
+		)
 		return
 	}
 

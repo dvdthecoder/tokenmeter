@@ -199,7 +199,14 @@ func cmdStart() *cobra.Command {
 				w.Header().Set("Content-Type", "application/json")
 				json.NewEncoder(w).Encode(stats)
 			})
-			mux.Handle("/", p)
+			mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Claude Code CLI sends HEAD / as a pre-flight connectivity check.
+				if r.Method == http.MethodHead && r.URL.Path == "/" {
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+				p.ServeHTTP(w, r)
+			}))
 
 			// Wrap with MITM handler so CONNECT tunnels (Copilot, Bedrock) are intercepted.
 			var handler http.Handler = mux

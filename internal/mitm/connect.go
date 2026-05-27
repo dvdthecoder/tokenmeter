@@ -119,12 +119,18 @@ func (h *Handler) tunnel(clientConn net.Conn, host string) {
 }
 
 // responseWriter captures the proxy response and writes it back to the TLS conn.
+// For SSE (text/event-stream) responses it switches to streaming mode: headers are
+// sent immediately on WriteHeader, body chunks are written as HTTP/1.1 chunked
+// transfer encoding, and the terminal chunk is written in flush(). Non-streaming
+// responses use the original buffered path.
 type responseWriter struct {
-	conn       *tls.Conn
+	conn       io.Writer     // *tls.Conn in production; io.Writer for testing
 	header     http.Header
 	statusCode int
-	body       []byte
+	body       []byte        // non-streaming accumulator
 	written    bool
+	streaming  bool          // true once Content-Type: text/event-stream detected
+	bufW       *bufio.Writer // used only in streaming mode
 }
 
 func (rw *responseWriter) Header() http.Header {
@@ -134,13 +140,48 @@ func (rw *responseWriter) Header() http.Header {
 	return rw.header
 }
 
+// WriteHeader detects SSE responses and immediately flushes the HTTP status line
+// and headers to the wire so streaming can begin. Non-SSE responses are unchanged.
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
+	if strings.Contains(rw.header.Get("Content-Type"), "text/event-stream") {
+		rw.streaming = true
+		rw.bufW = bufio.NewWriter(rw.conn)
+		rw.sendStreamingHeaders(code)
+	}
+}
+
+// sendStreamingHeaders writes the HTTP status line + headers to the wire with
+// Transfer-Encoding: chunked so the body can follow as individual chunks.
+func (rw *responseWriter) sendStreamingHeaders(code int) {
+	w := rw.bufW
+	fmt.Fprintf(w, "HTTP/1.1 %d %s\r\n", code, http.StatusText(code))
+	h := rw.header.Clone()
+	h.Set("Transfer-Encoding", "chunked")
+	h.Del("Content-Length") // incompatible with chunked encoding
+	_ = h.Write(w)          // writes canonical "Key: Value\r\n" lines
+	fmt.Fprintf(w, "\r\n")  // blank line separating headers from body
+	_ = w.Flush()
 }
 
 func (rw *responseWriter) Write(b []byte) (int, error) {
+	if rw.streaming {
+		if err := writeHTTPChunk(rw.bufW, b); err != nil {
+			return 0, err
+		}
+		_ = rw.bufW.Flush()
+		return len(b), nil
+	}
 	rw.body = append(rw.body, b...)
 	return len(b), nil
+}
+
+// Flush implements http.Flusher so httputil.ReverseProxy drives backpressure
+// correctly on streaming responses.
+func (rw *responseWriter) Flush() {
+	if rw.streaming && rw.bufW != nil {
+		_ = rw.bufW.Flush()
+	}
 }
 
 func (rw *responseWriter) flush() error {
@@ -148,6 +189,17 @@ func (rw *responseWriter) flush() error {
 		return nil
 	}
 	rw.written = true
+
+	if rw.streaming {
+		// Write HTTP/1.1 terminal chunk to signal end of chunked stream.
+		_, err := io.WriteString(rw.bufW, "0\r\n\r\n")
+		if err != nil {
+			return err
+		}
+		return rw.bufW.Flush()
+	}
+
+	// Non-streaming: original buffered path.
 	if rw.statusCode == 0 {
 		rw.statusCode = http.StatusOK
 	}
@@ -171,4 +223,16 @@ func (rw *responseWriter) keepAlive() bool {
 		return false
 	}
 	return strings.EqualFold(rw.header.Get("Connection"), "keep-alive")
+}
+
+// writeHTTPChunk writes a single HTTP/1.1 chunked transfer encoding frame.
+func writeHTTPChunk(w *bufio.Writer, data []byte) error {
+	if _, err := fmt.Fprintf(w, "%x\r\n", len(data)); err != nil {
+		return err
+	}
+	if _, err := w.Write(data); err != nil {
+		return err
+	}
+	_, err := io.WriteString(w, "\r\n")
+	return err
 }
