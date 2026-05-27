@@ -1,0 +1,1975 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Thin, GDPR-compliant token usage meter for LLM APIs">
+      
+      
+      
+        <link rel="canonical" href="https://dvdthecoder.github.io/tokenmeter/roadmap/">
+      
+      
+        <link rel="prev" href="../known-issues/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Roadmap - tokenmeter</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#roadmap" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="tokenmeter" class="md-header__button md-logo" aria-label="tokenmeter" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            tokenmeter
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Roadmap
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dvdthecoder/tokenmeter" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    dvdthecoder/tokenmeter
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../tools/claude-code/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Supported Tools
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../plugins/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Plugin Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../privacy/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Privacy & GDPR
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../development/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Development
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../known-issues/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Known Issues
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="tokenmeter" class="md-nav__button md-logo" aria-label="tokenmeter" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    tokenmeter
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dvdthecoder/tokenmeter" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    dvdthecoder/tokenmeter
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/local-visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local Visualization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/collector/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Central Collector
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported Tools
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Supported Tools
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/claude-code/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Claude Code
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/opencode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenCode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/codex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Codex CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/aider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aider
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/vscode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VS Code + Copilot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/gemini/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gemini CLI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Plugin Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provider Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/sinks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sink Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/backends/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../privacy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Privacy & GDPR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../development/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../known-issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-1-traffic-flows-tokens-captured" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 1 — Traffic flows, tokens captured
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-2-sqlite-persistence-query-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 2 — SQLite persistence + query CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-3-daemon-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 3 — Daemon + install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-4-backend-integrations-v04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 4 — Backend integrations (v0.4)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-5-otel-push-sink-v05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 5 — OTEL push sink (v0.5)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-6-gemini-provider-v06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 6 — Gemini provider (v0.6)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-7-per-user-value-v07" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 7 — Per-user value (v0.7)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-8-github-copilot-aws-bedrock-v08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-9-local-slm-insights-v09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 9 — Local SLM insights (v0.9)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-10-vs-code-extension-v010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 10 — VS Code extension (v0.10)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-11-central-collection-hardening-gdpr-facade-v011" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 11 — Central collection hardening + GDPR facade (v0.11)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-12-plugin-scaffold-webhook-cost-alerts-v012" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 12 — Plugin scaffold + webhook + cost alerts (v0.12)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-13-integration-test-harness-v013" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 13 — Integration test harness (v0.13)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-14-cursor-windsurf-backend-adapters-v014" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 14 — Cursor + Windsurf backend adapters (v0.14)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-1-traffic-flows-tokens-captured" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 1 — Traffic flows, tokens captured
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-2-sqlite-persistence-query-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 2 — SQLite persistence + query CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-3-daemon-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 3 — Daemon + install
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-4-backend-integrations-v04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 4 — Backend integrations (v0.4)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-5-otel-push-sink-v05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 5 — OTEL push sink (v0.5)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-6-gemini-provider-v06" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 6 — Gemini provider (v0.6)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-7-per-user-value-v07" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 7 — Per-user value (v0.7)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-8-github-copilot-aws-bedrock-v08" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-9-local-slm-insights-v09" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 9 — Local SLM insights (v0.9)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iteration-10-vs-code-extension-v010" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Iteration 10 — VS Code extension (v0.10)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-11-central-collection-hardening-gdpr-facade-v011" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 11 — Central collection hardening + GDPR facade (v0.11)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-12-plugin-scaffold-webhook-cost-alerts-v012" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 12 — Plugin scaffold + webhook + cost alerts (v0.12)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-13-integration-test-harness-v013" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 13 — Integration test harness (v0.13)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#planned-iteration-14-cursor-windsurf-backend-adapters-v014" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Planned — Iteration 14 — Cursor + Windsurf backend adapters (v0.14)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="roadmap">Roadmap</h1>
+<p>tokenmeter is built in focused iterations. Each ships a working, tested slice — no half-finished features.</p>
+<h2 id="status">Status</h2>
+<table>
+<thead>
+<tr>
+<th>Iteration</th>
+<th>Version</th>
+<th>Theme</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>—</td>
+<td>Traffic flows, tokens captured</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>2</td>
+<td>—</td>
+<td>SQLite persistence + query CLI</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>3</td>
+<td>—</td>
+<td>Daemon + install</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>4</td>
+<td>v0.4</td>
+<td>Backend integrations</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>5</td>
+<td>v0.5</td>
+<td>OTEL push sink</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>6</td>
+<td>v0.6</td>
+<td>Gemini provider</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>7</td>
+<td>v0.7</td>
+<td>Per-user value</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>8</td>
+<td>v0.8</td>
+<td>GitHub Copilot + AWS Bedrock providers</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>9</td>
+<td>v0.9</td>
+<td>Local SLM insights (on-device, Ollama)</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>10</td>
+<td>v0.10</td>
+<td>VS Code extension — status bar + usage dashboard</td>
+<td>✅ Done</td>
+</tr>
+<tr>
+<td>11</td>
+<td>v0.11</td>
+<td>Central collection hardening + GDPR facade</td>
+<td>Planned</td>
+</tr>
+<tr>
+<td>12</td>
+<td>v0.12</td>
+<td>Plugin scaffold + webhook + cost alerts</td>
+<td>Planned</td>
+</tr>
+<tr>
+<td>13</td>
+<td>v0.13</td>
+<td>Integration test harness — end-to-end smoke tests</td>
+<td>Planned</td>
+</tr>
+<tr>
+<td>14</td>
+<td>v0.14</td>
+<td>Cursor + Windsurf backend adapters</td>
+<td>Planned</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="iteration-1-traffic-flows-tokens-captured">✅ Iteration 1 — Traffic flows, tokens captured</h2>
+<ul>
+<li>Reverse proxy engine (<code>net/http/httputil.ReverseProxy</code>)</li>
+<li>Anthropic provider: SSE streaming + REST, all cache tiers (<code>cache_read</code>, <code>cache_creation</code>, ephemeral 5m/1h)</li>
+<li>OpenAI provider: streaming (with <code>stream_options</code> injection) + REST, vLLM support</li>
+<li>Full <code>UsageEvent</code> schema: client attribution, service tier, inference geo, cache write tokens</li>
+<li>Stdout sink for dev mode</li>
+<li>Client detection: <code>claude-cli/2.1.142</code> → <code>claude-code-cli@2.1.142</code></li>
+<li>Hardening: upstream timeouts, stream buffer cap, graceful SIGTERM shutdown</li>
+</ul>
+<h2 id="iteration-2-sqlite-persistence-query-cli">✅ Iteration 2 — SQLite persistence + query CLI</h2>
+<ul>
+<li>Local SQLite sink with async write queue (non-blocking proxy path)</li>
+<li>Auto-purge on startup (configurable retention)</li>
+<li><code>tokenmeter query</code> — table / JSON / CSV, filters: model, user, time window, limit</li>
+<li><code>tokenmeter purge</code> — GDPR date-range deletion</li>
+<li><code>tokenmeter export</code> — full dump in JSON or CSV</li>
+<li>In-memory tests (no disk I/O in CI)</li>
+</ul>
+<h2 id="iteration-3-daemon-install">✅ Iteration 3 — Daemon + install</h2>
+<ul>
+<li><code>tokenmeter daemon</code> — re-exec with <code>Setsid</code>, PID file, logs to platform path</li>
+<li><code>tokenmeter stop</code> — SIGTERM + 10 s drain + force kill</li>
+<li><code>tokenmeter status</code> — running/stopped + last 5 events</li>
+<li><code>tokenmeter install</code> — writes config, installs launchd plist (macOS) or systemd user unit (Linux), patches shell profile</li>
+<li><code>tokenmeter uninstall</code> — clean reversal of all install actions</li>
+<li>Idempotent shell patching for zsh, bash, fish</li>
+</ul>
+<h2 id="iteration-4-backend-integrations-v04">✅ Iteration 4 — Backend integrations (v0.4)</h2>
+<p>Each AI tool gets an adapter that auto-detects and configures itself:</p>
+<ul>
+<li><strong>Claude Code</strong> — skill files installed to <code>~/.claude/skills/</code> (<code>/proxy-status</code>, <code>/proxy-report</code>, <code>/proxy-purge</code>)</li>
+<li><strong>Codex CLI</strong> — detect + verify <code>OPENAI_BASE_URL</code></li>
+<li><strong>OpenCode</strong> — patch <code>~/.config/opencode/config.json</code> with proxy <code>baseURL</code>, merges safely with existing user config</li>
+<li><strong>VS Code (Cline)</strong> — patch <code>settings.json</code> with <code>cline.apiProvider</code> + <code>cline.openAiBaseUrl</code></li>
+<li><code>tokenmeter install --backend &lt;name&gt;</code> — target a specific tool</li>
+<li><code>tokenmeter verify</code> — HTTP health check + routing confirmation for all detected tools</li>
+</ul>
+<hr />
+<h2 id="iteration-5-otel-push-sink-v05">✅ Iteration 5 — OTEL push sink (v0.5)</h2>
+<ul>
+<li><code>plugins/sinks/otel/</code> — OTLP gRPC exporter to central collector</li>
+<li>Metrics: <code>llm.tokens.input</code>, <code>llm.tokens.output</code>, <code>llm.tokens.cached</code>, <code>llm.cost.usd</code>, <code>llm.latency.ms</code></li>
+<li>Attributes: <code>model</code>, <code>provider</code>, <code>user</code></li>
+<li>Config: <code>endpoint</code>, <code>insecure</code>, <code>timeout_ms</code>, <code>interval_s</code></li>
+<li>Testable without a real collector (ManualReader-backed test suite)</li>
+<li>Edge-based collection model: SQLite at edge (per-machine), OTEL push to central</li>
+</ul>
+<h2 id="iteration-6-gemini-provider-v06">✅ Iteration 6 — Gemini provider (v0.6)</h2>
+<ul>
+<li><code>plugins/providers/gemini/</code> — native <code>generativelanguage.googleapis.com</code> wire format</li>
+<li>Detects host, parses <code>usageMetadata</code> from SSE (final chunk wins) and REST</li>
+<li>Pricing table for 7 Gemini models; cached tokens billed at 25% of input price</li>
+<li>Unknown models fall back to gemini-2.0-flash pricing</li>
+</ul>
+<h2 id="iteration-7-per-user-value-v07">✅ Iteration 7 — Per-user value (v0.7)</h2>
+<ul>
+<li>OS user resolution: <code>TOKENMETER_USER</code> → <code>USER</code> → <code>USERNAME</code> → hostname → <code>"unknown"</code></li>
+<li><code>tokenmeter query --user &lt;name&gt;</code> — filter events by user</li>
+<li><code>tokenmeter purge --user &lt;name&gt;</code> — GDPR right-to-erasure per individual</li>
+<li>Optional pseudonymisation: <code>privacy.hash_user: true</code> → <code>SHA-256(username + org_salt)</code>; salt via <code>TOKENMETER_ORG_SALT</code> env var; default off</li>
+</ul>
+<h2 id="iteration-8-github-copilot-aws-bedrock-v08">✅ Iteration 8 — GitHub Copilot + AWS Bedrock (v0.8)</h2>
+<p>Enterprise model coverage — the two largest sources of LLM traffic not yet captured:</p>
+<ul>
+<li><strong>GitHub Copilot</strong> — HTTP CONNECT MITM interception (<code>internal/mitm/</code>); ECDSA local CA with on-demand per-host cert signing; VS Code <code>http.proxy</code> + <code>http.proxyStrictSSL: false</code> patched automatically by <code>tokenmeter install</code>; <code>tokenmeter cert install</code> adds CA to system trust store (macOS, Debian, Fedora)</li>
+<li><strong>AWS Bedrock</strong> — Converse API + InvokeModelWithResponseStream provider plugin; detects <code>*.bedrock.amazonaws.com</code>; cost table for Claude, Llama, Mistral, Nova on Bedrock; transparent SigV4 pass-through</li>
+<li>Copilot provider delegates to OpenAI-compatible wire format; cost always 0 (subscription)</li>
+<li>OpenAI plugin guard-rails: explicit exclusion of Copilot + Bedrock hosts so dedicated plugins always win</li>
+</ul>
+<h2 id="iteration-9-local-slm-insights-v09">✅ Iteration 9 — Local SLM insights (v0.9)</h2>
+<p><strong>Generate → store → surface.</strong> Insights are persistent, not ephemeral terminal output:</p>
+<ul>
+<li><code>tokenmeter insights</code> — aggregates SQLite events, sends privacy-safe context to Ollama, stores result, streams tokens to terminal; <code>--show</code> prints latest stored insight; <code>--last 30d</code> / <code>--model</code> flags</li>
+<li><code>GET /insights/latest</code> — JSON endpoint served by the proxy for Grafana and other consumers</li>
+<li><code>internal/insights/context.go</code> — <code>BuildContext()</code> produces model/user/cost/latency breakdown; zero prompt or response content included (GDPR-safe)</li>
+<li><code>internal/insights/ollama.go</code> — streaming HTTP client for Ollama <code>/api/generate</code>; graceful error if Ollama unreachable (non-fatal, skipped with log message)</li>
+<li><code>insights.auto_generate: daily</code> — daemon starts a background goroutine firing a 24h ticker</li>
+<li>Grafana: Infinity datasource provisioned, Insights row + text panel with usage instructions added to dashboard</li>
+</ul>
+<h2 id="iteration-10-vs-code-extension-v010">✅ Iteration 10 — VS Code extension (v0.10)</h2>
+<p>Surface data where developers already are — inside the editor, without opening a terminal or Grafana.</p>
+<ul>
+<li>TypeScript extension in <code>extensions/vscode/</code> (esbuild-bundled, 13.6 KB, zero runtime deps)</li>
+<li>Status bar item: <code>$(graph-line) 1.2k tokens · $0.0042</code> — polls every 10 s, click to open dashboard</li>
+<li>Webview dashboard panel: tokens by model (bar), cost over time (line), recent requests table — all via <code>tokenmeter query --format json</code> subprocess</li>
+<li>Auto-starts tokenmeter daemon on VS Code startup if not already running</li>
+<li>Three commands: <code>Tokenmeter: Open Dashboard</code>, <code>Start Daemon</code>, <code>Refresh Status Bar</code></li>
+<li>Config: <code>tokenmeter.binaryPath</code>, <code>tokenmeter.pollIntervalSeconds</code>, <code>tokenmeter.autoStartDaemon</code></li>
+</ul>
+<h2 id="planned-iteration-11-central-collection-hardening-gdpr-facade-v011">Planned — Iteration 11 — Central collection hardening + GDPR facade (v0.11)</h2>
+<p>GDPR tooling is sequenced here because it's the privacy layer applied <em>when</em> data is productionised to flow to a shared central collector — not before. The facade pattern: obfuscate at the edge before anything leaves.</p>
+<ul>
+<li>Redaction middleware (PII regex, configurable opt-in) — strips content before OTEL push</li>
+<li>SQLite encryption at rest (<code>TOKENMETER_ENCRYPTION_KEY</code>) — edge data at rest</li>
+<li><code>privacy.data_minimisation</code> mode — strips attribution fields, keeps counts + cost only</li>
+<li>Central collector production hardening — TLS, auth, retention policies</li>
+<li>Prometheus <code>/metrics</code> scrape endpoint (for shared/team deployments)</li>
+</ul>
+<p><a href="https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-11">Open issues →</a></p>
+<h2 id="planned-iteration-12-plugin-scaffold-webhook-cost-alerts-v012">Planned — Iteration 12 — Plugin scaffold + webhook + cost alerts (v0.12)</h2>
+<ul>
+<li><code>tokenmeter scaffold</code> fully implemented for all four plugin types</li>
+<li>Webhook sink — POST <code>UsageEvent</code> JSON to any endpoint</li>
+<li>Cost-alert middleware — configurable USD threshold → log + webhook</li>
+</ul>
+<p><a href="https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-12">Open issues →</a></p>
+<h2 id="planned-iteration-13-integration-test-harness-v013">Planned — Iteration 13 — Integration test harness (v0.13)</h2>
+<p>End-to-end smoke tests that fire real HTTP through a live proxy and assert SQLite output — no mocking, no real API keys:</p>
+<ul>
+<li>In-process proxy started on a random port; stub upstream server replays recorded API responses</li>
+<li>All five providers covered: Anthropic, OpenAI, Gemini, Copilot (MITM), Bedrock</li>
+<li>Streaming + non-streaming paths asserted separately</li>
+<li>Per-user attribution, <code>hash_user</code>, and <code>purge --user</code> verified</li>
+<li><code>make test-e2e</code> target, runs in CI with no external dependencies</li>
+</ul>
+<p><a href="https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-13">Open issues →</a></p>
+<h2 id="planned-iteration-14-cursor-windsurf-backend-adapters-v014">Planned — Iteration 14 — Cursor + Windsurf backend adapters (v0.14)</h2>
+<ul>
+<li>Cursor backend adapter — detects Cursor install, patches config, verifies <code>OPENAI_BASE_URL</code> routing</li>
+<li>Windsurf backend adapter — same pattern</li>
+</ul>
+<p><a href="https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-14">Open issues →</a></p>
+<hr />
+<h2 id="contributing">Contributing</h2>
+<p>See something missing? <a href="https://github.com/dvdthecoder/tokenmeter/issues/new/choose">Open an issue</a> or check <a href="https://github.com/dvdthecoder/tokenmeter/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> to submit a plugin.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "navigation.indexes", "content.code.copy", "content.code.annotate", "content.tabs.link", "search.highlight"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
