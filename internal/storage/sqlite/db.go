@@ -3,7 +3,12 @@
 package sqlite
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -18,6 +23,22 @@ import (
 	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 	_ "modernc.org/sqlite"
 )
+
+// Option configures a DB at open time.
+type Option func(*DB)
+
+// WithEncryptionKey enables AES-256-GCM field-level encryption. The raw key
+// string is SHA-256 hashed to derive a 32-byte AES key. Pass an empty string
+// to disable encryption (default).
+func WithEncryptionKey(key string) Option {
+	return func(d *DB) {
+		if key == "" {
+			return
+		}
+		h := sha256.Sum256([]byte(key))
+		d.encKey = h[:]
+	}
+}
 
 const ddl = `
 CREATE TABLE IF NOT EXISTS events (
@@ -56,12 +77,13 @@ CREATE INDEX IF NOT EXISTS idx_insights_generated_at ON insights(generated_at);
 
 // DB wraps a SQLite connection for tokenmeter event storage.
 type DB struct {
-	db *sql.DB
+	db     *sql.DB
+	encKey []byte // nil = no encryption; 32 bytes = AES-256 key
 }
 
 // Open creates or opens the SQLite database at path, runs schema migrations,
 // and enables WAL mode. The directory is created if it does not exist.
-func Open(path string) (*DB, error) {
+func Open(path string, opts ...Option) (*DB, error) {
 	if path != ":memory:" {
 		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 			return nil, fmt.Errorf("create db dir: %w", err)
@@ -84,7 +106,11 @@ func Open(path string) (*DB, error) {
 		db.Close()
 		return nil, fmt.Errorf("migration: %w", err)
 	}
-	return &DB{db: db}, nil
+	d := &DB{db: db}
+	for _, o := range opts {
+		o(d)
+	}
+	return d, nil
 }
 
 // runMigrations applies additive schema changes to existing databases.
@@ -108,6 +134,7 @@ func runMigrations(db *sql.DB) error {
 func (d *DB) Close() error { return d.db.Close() }
 
 // Insert writes a UsageEvent row. Duplicate request IDs are silently ignored.
+// String fields that may contain PII are encrypted when a key is configured.
 func (d *DB) Insert(e providers.UsageEvent) error {
 	streaming := 0
 	if e.StreamingMode {
@@ -121,8 +148,9 @@ func (d *DB) Insert(e providers.UsageEvent) error {
 		VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
 		e.RequestID,
 		e.Timestamp.UTC().Format(time.RFC3339),
-		e.SessionID,
-		e.Provider, e.Model, e.ServiceID, e.Username, e.ClientName, e.ClientVersion,
+		d.enc(e.SessionID),
+		e.Provider, e.Model, d.enc(e.ServiceID), d.enc(e.Username),
+		d.enc(e.ClientName), d.enc(e.ClientVersion),
 		e.ServiceTier, e.InferenceGeo,
 		e.TokensInput, e.TokensOutput, e.TokensCached, e.TokensCachedCreation,
 		e.LatencyMS, e.CostUSD, streaming,
@@ -207,6 +235,10 @@ func (d *DB) Query(opts QueryOpts) ([]Row, error) {
 		if r.LatencyMS > 0 {
 			r.TokensPerSec = float64(r.TokensOutput) / (float64(r.LatencyMS) / 1000.0)
 		}
+		r.SessionID = d.dec(r.SessionID)
+		r.Username = d.dec(r.Username)
+		r.ClientName = d.dec(r.ClientName)
+		r.ClientVersion = d.dec(r.ClientVersion)
 		out = append(out, r)
 	}
 	return out, rows.Err()
@@ -400,4 +432,56 @@ func (d *DB) LatestInsight() (*Insight, error) {
 	}
 	i.GeneratedAt, _ = time.Parse(time.RFC3339, tsStr)
 	return &i, nil
+}
+
+// enc encrypts s with AES-256-GCM and returns a base64url-encoded ciphertext.
+// Returns s unchanged if no key is configured or s is empty.
+func (d *DB) enc(s string) string {
+	if len(d.encKey) == 0 || s == "" {
+		return s
+	}
+	block, err := aes.NewCipher(d.encKey)
+	if err != nil {
+		return s
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return s
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
+		return s
+	}
+	ct := gcm.Seal(nonce, nonce, []byte(s), nil)
+	return base64.RawURLEncoding.EncodeToString(ct)
+}
+
+// dec decrypts a base64url-encoded AES-256-GCM ciphertext produced by enc.
+// Returns s unchanged if no key is configured, s is empty, or decryption fails
+// (allows reading rows written without encryption).
+func (d *DB) dec(s string) string {
+	if len(d.encKey) == 0 || s == "" {
+		return s
+	}
+	ct, err := base64.RawURLEncoding.DecodeString(s)
+	if err != nil {
+		return s // not encrypted (legacy row)
+	}
+	block, err := aes.NewCipher(d.encKey)
+	if err != nil {
+		return s
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return s
+	}
+	ns := gcm.NonceSize()
+	if len(ct) < ns {
+		return s
+	}
+	plain, err := gcm.Open(nil, ct[:ns], ct[ns:], nil)
+	if err != nil {
+		return s // wrong key or unencrypted row
+	}
+	return string(plain)
 }

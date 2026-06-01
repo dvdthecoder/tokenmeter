@@ -156,6 +156,11 @@ func cmdStart() *cobra.Command {
 				}
 			}
 
+			// openLocalDB opens the events DB with the configured encryption key.
+			openLocalDB := func() (*storage.DB, error) {
+				return storage.Open(activeSQLitePath, storage.WithEncryptionKey(cfg.Privacy.EncryptionKey))
+			}
+
 			p := proxy.New(cfg)
 			mux := http.NewServeMux()
 			mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -163,7 +168,7 @@ func cmdStart() *cobra.Command {
 				fmt.Fprintln(w, "ok")
 			})
 			mux.HandleFunc("/insights/latest", func(w http.ResponseWriter, r *http.Request) {
-				db, err := storage.Open(activeSQLitePath)
+				db, err := openLocalDB()
 				if err != nil {
 					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 					return
@@ -186,7 +191,7 @@ func cmdStart() *cobra.Command {
 				fmt.Fprint(w, dashboardHTML)
 			})
 			mux.HandleFunc("/api/v1/events", func(w http.ResponseWriter, r *http.Request) {
-				db, err := storage.Open(activeSQLitePath)
+				db, err := openLocalDB()
 				if err != nil {
 					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 					return
@@ -206,7 +211,7 @@ func cmdStart() *cobra.Command {
 				json.NewEncoder(w).Encode(rows)
 			})
 			mux.HandleFunc("/api/v1/stats", func(w http.ResponseWriter, r *http.Request) {
-				db, err := storage.Open(activeSQLitePath)
+				db, err := openLocalDB()
 				if err != nil {
 					http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 					return
@@ -261,7 +266,7 @@ func cmdStart() *cobra.Command {
 					ticker := time.NewTicker(24 * time.Hour)
 					defer ticker.Stop()
 					for range ticker.C {
-						db, err := storage.Open(activeSQLitePath)
+						db, err := openLocalDB()
 						if err != nil {
 							slog.Warn("insights: open db", "err", err)
 							continue
@@ -354,7 +359,7 @@ func cmdStatus() *cobra.Command {
 			fmt.Printf("status:  running (pid %d)\n", pid)
 			fmt.Printf("log:     %s\n", daemon.LogPath())
 
-			db, err := storage.Open(sqlitesink.DefaultDBPath())
+			db, err := storage.Open(sqlitesink.DefaultDBPath(), storage.WithEncryptionKey(os.Getenv("TOKENMETER_ENCRYPTION_KEY")))
 			if err != nil {
 				return nil // DB not yet created is fine
 			}
@@ -644,7 +649,7 @@ func openDB(cmd *cobra.Command) (*storage.DB, error) {
 	if path == "" {
 		path = sqlitesink.DefaultDBPath()
 	}
-	db, err := storage.Open(path)
+	db, err := storage.Open(path, storage.WithEncryptionKey(os.Getenv("TOKENMETER_ENCRYPTION_KEY")))
 	if err != nil {
 		return nil, fmt.Errorf("open database %s: %w", path, err)
 	}

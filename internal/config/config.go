@@ -10,6 +10,7 @@ type Config struct {
 	Sinks      map[string]SinkConfig    `yaml:"sinks"`
 	Middleware []MiddlewareConfig        `yaml:"middleware"`
 	Privacy    PrivacyConfig            `yaml:"privacy"`
+	Pricing    PricingConfig            `yaml:"pricing"`
 	Retention  RetentionConfig          `yaml:"retention"`
 	Insights   InsightsConfig           `yaml:"insights"`
 }
@@ -34,10 +35,15 @@ type MiddlewareConfig struct {
 type PrivacyConfig struct {
 	DataMinimisation bool   `yaml:"data_minimisation"`
 	HashServiceID    bool   `yaml:"hash_service_id"` // default: true
-	HashUser         bool   `yaml:"hash_user"`        // pseudonymise username before storage
-	OrgSalt          string `yaml:"org_salt"`         // shared salt for user hashing; prefer TOKENMETER_ORG_SALT
+	HashUser         bool   `yaml:"hash_user"`
+	OrgSalt          string `yaml:"org_salt"`       // prefer TOKENMETER_ORG_SALT env var
 	EncryptAtRest    bool   `yaml:"encrypt_at_rest"`
 	EncryptionKey    string `yaml:"encryption_key"` // prefer TOKENMETER_ENCRYPTION_KEY env var
+}
+
+type PricingConfig struct {
+	RemoteFallback bool   `yaml:"remote_fallback"` // fetch unknown model prices from models.dev
+	CachePath      string `yaml:"cache_path"`      // default: ~/.local/share/tokenmeter/pricing-cache.json
 }
 
 type RetentionConfig struct {
@@ -94,6 +100,9 @@ func applyDefaults(cfg *Config) {
 	cfg.Privacy.HashServiceID = true // always default to hashing
 	if salt := os.Getenv("TOKENMETER_ORG_SALT"); salt != "" {
 		cfg.Privacy.OrgSalt = salt
+	}
+	if key := os.Getenv("TOKENMETER_ENCRYPTION_KEY"); key != "" {
+		cfg.Privacy.EncryptionKey = key
 	}
 	if cfg.Insights.OllamaURL == "" {
 		cfg.Insights.OllamaURL = "http://localhost:11434"

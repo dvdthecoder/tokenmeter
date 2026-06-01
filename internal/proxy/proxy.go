@@ -20,6 +20,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/dvdthecoder/tokenmeter/internal/config"
+	"github.com/dvdthecoder/tokenmeter/internal/pricing"
 	"github.com/dvdthecoder/tokenmeter/plugins/middleware"
 	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
@@ -67,13 +68,19 @@ type Proxy struct {
 	cfg      *config.Config
 	rp       *httputil.ReverseProxy
 	sessions *sessionTracker
+	pricer   *pricing.Resolver // nil when remote_fallback is disabled
 }
 
 // New creates a Proxy from the given config.
 func New(cfg *config.Config) *Proxy {
+	var pricer *pricing.Resolver
+	if cfg.Pricing.RemoteFallback {
+		pricer = pricing.New(cfg.Pricing.CachePath)
+	}
 	p := &Proxy{
 		cfg:      cfg,
 		sessions: &sessionTracker{entries: make(map[string]*sessionEntry)},
+		pricer:   pricer,
 	}
 	p.rp = &httputil.ReverseProxy{
 		Director:       p.director,
@@ -216,7 +223,7 @@ func (p *Proxy) modifyResponse(resp *http.Response) error {
 			TokensCached:         cached,
 			TokensCachedCreation: cachedCreation,
 			LatencyMS:            latency,
-			CostUSD:              provider.EstimateCost(model, input, output, cached, cachedCreation),
+			CostUSD:              p.estimateCost(provider, model, input, output, cached, cachedCreation),
 			Timestamp:            startTime,
 			StreamingMode:        isStream,
 		}
@@ -281,4 +288,16 @@ func (p *Proxy) emit(ctx context.Context, event providers.UsageEvent) {
 func isSSE(resp *http.Response) bool {
 	ct := resp.Header.Get("Content-Type")
 	return strings.Contains(ct, "text/event-stream")
+}
+
+// estimateCost delegates to the provider plugin first; if it returns 0 and a
+// remote pricing resolver is configured, falls back to models.dev pricing.
+func (p *Proxy) estimateCost(prov providers.ProviderPlugin, model string, input, output, cached, cachedCreation int64) float64 {
+	if cost := prov.EstimateCost(model, input, output, cached, cachedCreation); cost > 0 {
+		return cost
+	}
+	if p.pricer == nil {
+		return 0
+	}
+	return p.pricer.Cost(prov.Name(), model, input, output, cached, cachedCreation)
 }

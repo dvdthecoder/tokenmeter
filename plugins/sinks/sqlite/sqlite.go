@@ -47,7 +47,11 @@ func (s *Sink) Init(cfg map[string]any) error {
 		retentionDays = v
 	}
 
-	db, err := storage.Open(path)
+	encKey, _ := cfg["encryption_key"].(string)
+	if encKey == "" {
+		encKey = os.Getenv("TOKENMETER_ENCRYPTION_KEY")
+	}
+	db, err := storage.Open(path, storage.WithEncryptionKey(encKey))
 	if err != nil {
 		return fmt.Errorf("sqlite sink: %w", err)
 	}
