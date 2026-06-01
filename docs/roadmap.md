@@ -16,7 +16,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 8 | v0.8 | GitHub Copilot + AWS Bedrock providers | ✅ Done |
 | 9 | v0.9 | Local SLM insights (on-device, Ollama) | ✅ Done |
 | 10 | v0.10 | VS Code extension — status bar + usage dashboard | ✅ Done |
-| 11 | v0.11 | Central collection hardening + GDPR facade | Planned |
+| 11 | v0.11 | Central collection hardening + GDPR facade | 🔨 In progress |
 | 12 | v0.12 | Plugin scaffold + webhook + cost alerts | Planned |
 | 13 | v0.13 | Integration test harness — end-to-end smoke tests | Planned |
 | 14 | v0.14 | Cursor + Windsurf backend adapters | Planned |
@@ -118,15 +118,17 @@ Surface data where developers already are — inside the editor, without opening
 - Three commands: `Tokenmeter: Open Dashboard`, `Start Daemon`, `Refresh Status Bar`
 - Config: `tokenmeter.binaryPath`, `tokenmeter.pollIntervalSeconds`, `tokenmeter.autoStartDaemon`
 
-## Planned — Iteration 11 — Central collection hardening + GDPR facade (v0.11)
+## 🔨 Iteration 11 — Central collection hardening + GDPR facade (v0.11)
 
 GDPR tooling is sequenced here because it's the privacy layer applied *when* data is productionised to flow to a shared central collector — not before. The facade pattern: obfuscate at the edge before anything leaves.
 
-- Redaction middleware (PII regex, configurable opt-in) — strips content before OTEL push
-- SQLite encryption at rest (`TOKENMETER_ENCRYPTION_KEY`) — edge data at rest
-- `privacy.data_minimisation` mode — strips attribution fields, keeps counts + cost only
-- Central collector production hardening — TLS, auth, retention policies
-- Prometheus `/metrics` scrape endpoint (for shared/team deployments)
+- ✅ Redaction middleware (PII regex, configurable opt-in) — strips fields before any sink
+- ✅ SQLite field-level encryption (AES-256-GCM, `TOKENMETER_ENCRYPTION_KEY`) — edge data at rest
+- ✅ `privacy.data_minimisation` mode — strips all attribution fields, keeps counts + cost only
+- ✅ Prometheus `/metrics` scrape endpoint (for shared/team deployments)
+- ✅ Remote pricing fallback — unknown models resolved via models.dev with 24 h disk cache
+- ✅ Tokens/sec metric (`tok/s`) in query output and stats aggregates
+- ⏳ Central collector production hardening — TLS, auth, retention policies (GH#27)
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-11)
 

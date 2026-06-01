@@ -27,7 +27,7 @@ tokenmeter scaffold sink webhook
 | `stdout` | ✅ Available | `sinks.stdout` |
 | `sqlite` | ✅ Available | `sinks.sqlite` |
 | `otel` | ✅ Available | `sinks.otel` |
-| `prometheus` | 🔨 v0.9 | `sinks.prometheus` |
+| `prometheus` | ✅ Available | `sinks.prometheus` |
 
 ## OTEL sink config
 
@@ -60,6 +60,31 @@ Metrics emitted per event (attributes: `model`, `provider`, `user`):
 | `llm.latency.ms` | Histogram | `ms` |
 
 `llm.tokens.cached` is only recorded when non-zero (avoids polluting dashboards with zero-series). `Close()` flushes with a 10 s timeout — critical for ephemeral/sidecar deployments.
+
+## Prometheus sink config
+
+The Prometheus sink exposes a `/metrics` scrape endpoint using a private registry (does not pollute the default global registry).
+
+```yaml
+sinks:
+  prometheus:
+    enabled: true
+    options:
+      listen: "127.0.0.1:9090"   # address for the /metrics endpoint
+```
+
+Metrics exposed (labels: `model`, `provider`, `user`):
+
+| Metric | Type | Buckets / notes |
+|---|---|---|
+| `llm_tokens_input_total` | Counter | — |
+| `llm_tokens_output_total` | Counter | — |
+| `llm_tokens_cached_total` | Counter | Only recorded when non-zero |
+| `llm_cost_usd_total` | Counter | — |
+| `llm_latency_ms` | Histogram | 100, 250, 500, 1000, 2500, 5000, 10000, 30000 ms |
+
+!!! tip
+    Metric names mirror the OTEL sink (`llm.tokens.input` → `llm_tokens_input_total`) so both sinks can feed the same Grafana dashboards.
 
 ## Writing a new sink
 

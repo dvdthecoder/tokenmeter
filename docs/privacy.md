@@ -104,4 +104,51 @@ In `mode: shared`, multiple developers' events land in the same database. Recomm
 
 ## Data minimisation mode
 
-Planned for v0.11 (central collection hardening): `privacy.data_minimisation: true` will drop `username`, `client_name`, and `client_version` from every event before it reaches any sink — useful when pushing to a shared central collector.
+When `privacy.data_minimisation: true`, all attribution fields are zeroed before any sink receives the event. Only token counts, cost, latency, provider, model, and timestamp are kept.
+
+```yaml
+privacy:
+  data_minimisation: true
+```
+
+Fields stripped:
+
+| Field | Normal value | Minimised |
+|---|---|---|
+| `username` | `alice` | `""` |
+| `client_name` | `claude-code-cli` | `""` |
+| `client_version` | `2.1.142` | `""` |
+| `session_id` | `syn-a3f9c2b1` | `""` |
+| `service_id` | `3f4a9c2b…` | `""` |
+
+Use this when pushing to a shared central collector where per-user attribution is not needed or not permitted.
+
+!!! warning
+    Data minimisation takes precedence over `hash_user` and `hash_service_id`. Enabling both is harmless but minimisation always wins.
+
+## Redaction middleware
+
+The redaction middleware strips PII from configurable fields using regex patterns, running *before* any sink receives the event.
+
+```yaml
+middleware:
+  - name: redaction
+    options:
+      enabled: true
+      patterns:
+        - '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'  # email
+        - '\b\d{3}-\d{2}-\d{4}\b'                                   # SSN
+      fields:
+        - username
+        - service_id
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `enabled` | `true` | Toggle without removing the block |
+| `patterns` | `[]` | List of Go regex patterns to replace with `[REDACTED]` |
+| `fields` | `["username", "service_id"]` | Fields to apply patterns to |
+
+Valid field names: `username`, `service_id`, `session_id`, `client_name`.
+
+See [Middleware plugins](plugins/middleware.md) for full reference and writing custom middleware.

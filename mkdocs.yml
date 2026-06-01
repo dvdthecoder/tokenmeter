@@ -65,6 +65,7 @@ nav:
     - Overview: plugins/overview.md
     - Provider Plugins: plugins/providers.md
     - Sink Plugins: plugins/sinks.md
+    - Middleware Plugins: plugins/middleware.md
     - Backend Adapters: plugins/backends.md
   - CLI Reference: cli.md
   - Privacy & GDPR: privacy.md

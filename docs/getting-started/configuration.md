@@ -44,8 +44,20 @@ privacy:
   hash_service_id: true       # SHA-256 hash service_id before storage (default: true)
   hash_user: false            # pseudonymise username: SHA-256(username + org_salt)
   org_salt: ""                # shared team salt; prefer TOKENMETER_ORG_SALT env var
-  encrypt_at_rest: false      # SQLite encryption (requires TOKENMETER_ENCRYPTION_KEY)
+  data_minimisation: false    # strip all attribution fields (username, client, session, service_id)
+  encrypt_at_rest: false      # SQLite field-level encryption (AES-256-GCM)
   encryption_key: ""          # prefer TOKENMETER_ENCRYPTION_KEY env var
+
+pricing:
+  remote_fallback: false      # fetch prices for unknown models from models.dev
+  cache_path: ""              # default: ~/.local/share/tokenmeter/pricing-cache.json
+
+middleware: []                # optional chain of transform/gate plugins (runs before sinks)
+# middleware:
+#   - name: redaction
+#     options:
+#       patterns: ['\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b']
+#       fields: [username, service_id]
 
 retention:
   days: 90                    # auto-purge events older than this on startup
