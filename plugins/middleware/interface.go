@@ -31,6 +31,16 @@ func Register(m MiddlewarePlugin) {
 	registry = append(registry, m)
 }
 
+// Get returns a registered middleware by name.
+func Get(name string) (MiddlewarePlugin, bool) {
+	for _, m := range registry {
+		if m.Name() == name {
+			return m, true
+		}
+	}
+	return nil, false
+}
+
 // Chain returns the ordered middleware list.
 func Chain() []MiddlewarePlugin {
 	return registry

@@ -25,6 +25,7 @@ import (
 	"github.com/dvdthecoder/tokenmeter/internal/proxy"
 	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
 	"github.com/dvdthecoder/tokenmeter/plugins/backends"
+	"github.com/dvdthecoder/tokenmeter/plugins/middleware"
 	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
 	sqlitesink "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 
@@ -33,12 +34,14 @@ import (
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/codex"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/middleware/redaction"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/bedrock"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/copilot"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/gemini"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/openai"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/prometheus"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/stdout"
 )
@@ -123,6 +126,18 @@ func cmdStart() *cobra.Command {
 					return fmt.Errorf("init sink %s: %w", name, err)
 				}
 				slog.Info("sink enabled", "sink", name)
+			}
+
+			for _, mc := range cfg.Middleware {
+				mw, ok := middleware.Get(mc.Name)
+				if !ok {
+					slog.Warn("unknown middleware in config", "middleware", mc.Name)
+					continue
+				}
+				if err := mw.Init(mc.Options); err != nil {
+					return fmt.Errorf("init middleware %s: %w", mc.Name, err)
+				}
+				slog.Info("middleware enabled", "middleware", mc.Name)
 			}
 
 			// Resolve the active SQLite path so dashboard/API handlers read
