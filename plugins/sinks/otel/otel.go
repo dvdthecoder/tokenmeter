@@ -4,14 +4,18 @@ package otel
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	otelmetric "go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/dvdthecoder/tokenmeter/plugins/providers"
 	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
@@ -35,7 +39,7 @@ func (s *Sink) Name() string { return "otel" }
 
 // Init creates the OTLP gRPC exporter and registers all metric instruments.
 // Config keys: "endpoint" (string), "insecure" (bool), "timeout_ms" (int),
-// "interval_s" (int — push interval in seconds, default 30).
+// "interval_s" (int), "bearer_token" (string), "tls_ca_cert" (string — path to CA cert).
 func (s *Sink) Init(cfg map[string]any) error {
 	endpoint, _ := cfg["endpoint"].(string)
 	if endpoint == "" {
@@ -53,6 +57,8 @@ func (s *Sink) Init(cfg map[string]any) error {
 	if v, ok := cfg["interval_s"].(int); ok && v > 0 {
 		intervalS = v
 	}
+	bearerToken, _ := cfg["bearer_token"].(string)
+	tlsCACert, _ := cfg["tls_ca_cert"].(string)
 
 	opts := []otlpmetricgrpc.Option{
 		otlpmetricgrpc.WithEndpoint(endpoint),
@@ -60,6 +66,17 @@ func (s *Sink) Init(cfg map[string]any) error {
 	}
 	if tlsInsecure {
 		opts = append(opts, otlpmetricgrpc.WithInsecure())
+	} else if tlsCACert != "" {
+		tlsCfg, err := loadTLSConfig(tlsCACert)
+		if err != nil {
+			return fmt.Errorf("otel sink: load CA cert: %w", err)
+		}
+		opts = append(opts, otlpmetricgrpc.WithTLSCredentials(credentials.NewTLS(tlsCfg)))
+	}
+	if bearerToken != "" {
+		opts = append(opts, otlpmetricgrpc.WithHeaders(map[string]string{
+			"Authorization": "Bearer " + bearerToken,
+		}))
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -144,6 +161,19 @@ func (s *Sink) Write(_ context.Context, e providers.UsageEvent) error {
 	s.costUSD.Add(ctx, e.CostUSD, opt)
 	s.latencyMS.Record(ctx, e.LatencyMS, opt)
 	return nil
+}
+
+// loadTLSConfig builds a *tls.Config that trusts the PEM cert file at caPath.
+func loadTLSConfig(caPath string) (*tls.Config, error) {
+	pem, err := os.ReadFile(caPath)
+	if err != nil {
+		return nil, err
+	}
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(pem) {
+		return nil, fmt.Errorf("no valid PEM certificates in %s", caPath)
+	}
+	return &tls.Config{RootCAs: pool}, nil
 }
 
 // Close flushes pending metrics and shuts down the provider.

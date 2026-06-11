@@ -32,8 +32,10 @@ import (
 	// Blank imports register built-in plugins via init().
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/claudecode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/codex"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/cursor"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/windsurf"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/middleware/redaction"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/bedrock"

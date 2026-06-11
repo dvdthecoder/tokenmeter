@@ -1,0 +1,81 @@
+# tokenmeter central collector stack — PRODUCTION
+#
+# Differences from docker-compose.yaml:
+#   - OTLP gRPC/HTTP use TLS (certs/collector.{crt,key})
+#   - Bearer-token authentication on the collector receiver
+#   - Prometheus bound to 127.0.0.1 (not exposed to the internet)
+#   - Grafana admin password from GF_SECURITY_ADMIN_PASSWORD env var
+#
+# Quick start:
+#   1. ./generate-certs.sh
+#   2. export TOKENMETER_COLLECTOR_TOKEN=$(openssl rand -hex 32)
+#   3. export GF_SECURITY_ADMIN_PASSWORD=<your-password>
+#   4. docker compose -f docker-compose.prod.yaml up -d
+#
+# Edge tokenmeter config (each developer machine):
+#   sinks:
+#     otel:
+#       enabled: true
+#       options:
+#         endpoint: "<this-host>:4317"
+#         insecure: false
+#         tls_ca_cert: /path/to/certs/ca.crt
+#         bearer_token: "<TOKENMETER_COLLECTOR_TOKEN value>"
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.119.0
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector-config.prod.yaml:/etc/otel/config.yaml:ro
+      - ./certs:/etc/otel/certs:ro
+    ports:
+      - "4317:4317"    # OTLP gRPC (TLS + auth)
+      - "4318:4318"    # OTLP HTTP (TLS + auth)
+    environment:
+      - TOKENMETER_COLLECTOR_TOKEN=${TOKENMETER_COLLECTOR_TOKEN:?set TOKENMETER_COLLECTOR_TOKEN}
+    restart: unless-stopped
+    networks:
+      - collector
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=90d"
+      - "--web.listen-address=127.0.0.1:9090"   # loopback only
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    networks:
+      - collector
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:?set GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/tokenmeter.json
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+      - GF_SERVER_PROTOCOL=http
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - collector
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  collector:

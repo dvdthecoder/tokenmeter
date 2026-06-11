@@ -44,9 +44,37 @@ sinks:
     enabled: true
     options:
       endpoint: "localhost:4317"   # gRPC endpoint (host:port)
-      insecure: true               # false = TLS
+      insecure: true               # false = TLS (required for production)
       timeout_ms: 5000             # export timeout
       interval_s: 30               # push interval
+      # Production: TLS + bearer-token auth
+      tls_ca_cert: ""              # path to CA cert (from generate-certs.sh)
+      bearer_token: ""             # matches TOKENMETER_COLLECTOR_TOKEN on collector
+```
+
+#### Production config (TLS + auth)
+
+For team deployments, use the hardened collector stack in `deploy/collector/`:
+
+```sh
+cd deploy/collector
+./generate-certs.sh collector.internal   # or use an IP
+export TOKENMETER_COLLECTOR_TOKEN=$(openssl rand -hex 32)
+export GF_SECURITY_ADMIN_PASSWORD=<your-password>
+docker compose -f docker-compose.prod.yaml up -d
+```
+
+Then on each developer machine:
+
+```yaml
+sinks:
+  otel:
+    enabled: true
+    options:
+      endpoint: "collector.internal:4317"
+      insecure: false
+      tls_ca_cert: "/path/to/certs/ca.crt"
+      bearer_token: "<TOKENMETER_COLLECTOR_TOKEN value>"
 ```
 
 Metrics emitted per event (attributes: `model`, `provider`, `user`):

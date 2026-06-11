@@ -56,6 +56,8 @@ nav:
     - Central Collector: getting-started/collector.md
   - Supported Tools:
     - Claude Code: tools/claude-code.md
+    - Cursor: tools/cursor.md
+    - Windsurf: tools/windsurf.md
     - OpenCode: tools/opencode.md
     - Codex CLI: tools/codex.md
     - Aider: tools/aider.md
