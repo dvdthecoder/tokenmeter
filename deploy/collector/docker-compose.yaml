@@ -4,8 +4,8 @@
 # stores metrics in Prometheus, and exposes a Grafana dashboard.
 #
 # Usage:
-#   docker compose up -d
-#   open http://localhost:3000   (admin / tokenmeter)
+#   GF_SECURITY_ADMIN_PASSWORD=yourpassword docker compose up -d
+#   open http://localhost:3000   (admin / <your password>, default: tokenmeter)
 #
 # Point each edge tokenmeter at this host:
 #   sinks.otel.options.endpoint: "<this-host>:4317"
@@ -48,7 +48,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=tokenmeter
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-tokenmeter}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/tokenmeter.json
       - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
