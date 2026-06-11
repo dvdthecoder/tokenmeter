@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 
 	"encoding/json"
@@ -24,6 +25,7 @@ import (
 	"github.com/dvdthecoder/tokenmeter/internal/mitm"
 	"github.com/dvdthecoder/tokenmeter/internal/proxy"
 	storage "github.com/dvdthecoder/tokenmeter/internal/storage/sqlite"
+	"github.com/dvdthecoder/tokenmeter/internal/tui"
 	"github.com/dvdthecoder/tokenmeter/plugins/backends"
 	"github.com/dvdthecoder/tokenmeter/plugins/middleware"
 	"github.com/dvdthecoder/tokenmeter/plugins/sinks"
@@ -65,6 +67,7 @@ func main() {
 		cmdDaemon(),
 		cmdStop(),
 		cmdStatus(),
+		cmdTop(),
 		cmdInstall(),
 		cmdUninstall(),
 		cmdVerify(),
@@ -376,6 +379,60 @@ func cmdStatus() *cobra.Command {
 			storage.WriteTable(os.Stdout, rows)
 			return nil
 		},
+	}
+}
+
+func cmdTop() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "top",
+		Short: "Live terminal dashboard — streaming token usage and cost",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			jsonMode, _ := cmd.Flags().GetBool("json")
+			db, err := openDB(cmd)
+			if err != nil {
+				return err
+			}
+			defer db.Close()
+
+			if jsonMode {
+				return runTopJSON(cmd, db)
+			}
+
+			m := tui.NewTop(db)
+			p := tea.NewProgram(m, tea.WithAltScreen())
+			_, err = p.Run()
+			return err
+		},
+	}
+	cmd.Flags().Bool("json", false, "Emit newline-delimited JSON instead of the TUI (for scripting)")
+	cmd.Flags().String("db", "", "Path to SQLite database (default: ~/.local/share/tokenmeter/events.db)")
+	return cmd
+}
+
+// runTopJSON polls for new events and prints them as ndjson to stdout.
+func runTopJSON(cmd *cobra.Command, db *storage.DB) error {
+	lastSeen := time.Now().Add(-2 * time.Second)
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+	ctx := cmd.Context()
+	enc := json.NewEncoder(os.Stdout)
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			rows, err := db.Query(storage.QueryOpts{Since: lastSeen})
+			if err != nil {
+				slog.Warn("top --json: query failed", "err", err)
+				continue
+			}
+			lastSeen = time.Now()
+			for i := len(rows) - 1; i >= 0; i-- { // oldest first
+				if err := enc.Encode(rows[i]); err != nil {
+					return err
+				}
+			}
+		}
 	}
 }
 
