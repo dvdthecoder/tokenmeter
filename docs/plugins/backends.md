@@ -25,10 +25,12 @@ tokenmeter scaffold backend cursor
 
 | Backend | Tool | Status | Hook |
 |---|---|---|---|
-| `claudecode` | Claude Code CLI | 🔨 v0.4 | `ANTHROPIC_BASE_URL` + skill install |
-| `codex` | Codex CLI | 🔨 v0.4 | `OPENAI_BASE_URL` |
-| `opencode` | OpenCode | 🔨 v0.4 | `~/.config/opencode/config.json` |
-| `vscode` | Continue + Cline | 🔨 v0.4 | VS Code settings JSON |
+| `claudecode` | Claude Code CLI | ✅ v0.4 | `ANTHROPIC_BASE_URL` + skill install |
+| `codex` | Codex CLI | ✅ v0.4 | `OPENAI_BASE_URL` |
+| `opencode` | OpenCode | ✅ v0.4 | `~/.config/opencode/config.json` |
+| `vscode` | Continue + Cline | ✅ v0.4 | VS Code settings JSON |
+| `cursor` | Cursor | ✅ v0.14 | `settings.json` `http.proxy` + `http.proxyStrictSSL: false` |
+| `windsurf` | Windsurf | ✅ v0.14 | `settings.json` `http.proxy` + `http.proxyStrictSSL: false` |
 
 ## Writing a new backend
 

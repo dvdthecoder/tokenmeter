@@ -63,6 +63,8 @@ Prompts and responses are **never stored**.
 | Codex CLI | `OPENAI_BASE_URL` | ✅ |
 | Continue.dev (VS Code) | `OPENAI_BASE_URL` | ✅ |
 | Cline (VS Code) | `settings.json` patch | ✅ |
+| Cursor | `settings.json` `http.proxy` | ✅ |
+| Windsurf | `settings.json` `http.proxy` | ✅ |
 | Gemini CLI | native Gemini API | ✅ |
 | GitHub Copilot | MITM proxy + local CA | ✅ |
 | **VS Code Extension** | status bar + dashboard webview | ✅ |
@@ -89,6 +91,7 @@ Prompts and responses are **never stored**.
 - **GDPR-ready** — `service_id` hashed, per-user right to erasure via `tokenmeter purge --user`
 - **On-device insights** — `tokenmeter insights` uses a local Ollama SLM for cost analysis; no data leaves the machine
 - **VS Code extension** — live status bar token count + cost, usage dashboard webview, auto-starts daemon
+- **`tokenmeter top`** — abtop-inspired live terminal dashboard; polls SQLite every 2 s, vim-style scroll, proxy health indicator, `--json` flag for scripting
 
 [Get started →](getting-started/installation.md){ .md-button .md-button--primary }
 [Roadmap →](roadmap.md){ .md-button }

@@ -1,10 +1,11 @@
 # Visualize locally
 
-Four ways to see your captured token data, in order of setup complexity:
+Five ways to see your captured token data, in order of setup complexity:
 
 | Option | Requires | What you get |
 |---|---|---|
 | [Terminal query](#terminal-query) | Nothing extra | Table / JSON / CSV in the shell |
+| [`tokenmeter top`](#live-terminal-tui) | Nothing extra | Live scrollable TUI, auto-polls every 2 s |
 | [Built-in web dashboard](#built-in-web-dashboard) | Proxy running | Live browser dashboard, auto-refresh |
 | [VS Code extension](#vs-code-extension) | tokenmeter VS Code extension | Live status bar + dashboard webview |
 | [Grafana dashboard](#grafana-dashboard) | Docker | Full metrics dashboard with charts |
@@ -56,6 +57,38 @@ Or use the dedicated export command (includes all fields):
 ```sh
 tokenmeter export --format csv > usage.csv
 tokenmeter export --format json > usage.json
+```
+
+---
+
+## Live terminal TUI
+
+`tokenmeter top` is an abtop-inspired live terminal dashboard. It reads directly from SQLite — the proxy does not need to be running.
+
+```sh
+tokenmeter top
+```
+
+**What you see:**
+
+- **Stats bar** — cumulative request count, tokens in/out/cached, total cost, average tok/s since the session started (or last reset)
+- **Event table** — newest events first, 8-column layout (time, provider, model, user, in, out, cost, tok/s)
+- **Proxy health indicator** — top-right corner shows `● proxy running pid XXXX` (green) or `○ proxy stopped` (red)
+
+**Keybindings:**
+
+| Key | Action |
+|---|---|
+| `q` / `Ctrl-C` | Quit |
+| `r` | Reset stats and event buffer |
+| `j` / `↓` | Scroll down |
+| `k` / `↑` | Scroll up |
+| `g` / `G` | Jump to top / bottom |
+
+**Scripting mode** — use `--json` to stream ndjson to stdout instead of launching the TUI:
+
+```sh
+tokenmeter top --json | jq 'select(.provider == "anthropic") | .cost_usd'
 ```
 
 ---
