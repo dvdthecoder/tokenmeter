@@ -28,6 +28,7 @@ tokenmeter scaffold sink webhook
 | `sqlite` | ✅ Available | `sinks.sqlite` |
 | `otel` | ✅ Available | `sinks.otel` |
 | `prometheus` | ✅ Available | `sinks.prometheus` |
+| `webhook` | ✅ Available | `sinks.webhook` |
 
 ## OTEL sink config
 
@@ -88,6 +89,28 @@ Metrics emitted per event (attributes: `model`, `provider`, `user`):
 | `llm.latency.ms` | Histogram | `ms` |
 
 `llm.tokens.cached` is only recorded when non-zero (avoids polluting dashboards with zero-series). `Close()` flushes with a 10 s timeout — critical for ephemeral/sidecar deployments.
+
+## Webhook sink config
+
+The webhook sink POSTs every `UsageEvent` as JSON to a configurable endpoint. Writes are async (buffered channel) — HTTP latency never blocks the proxy path.
+
+```yaml
+sinks:
+  webhook:
+    enabled: true
+    options:
+      url: "https://hooks.example.com/tokenmeter"
+      method: POST            # default
+      timeout_ms: 5000        # per-request timeout
+      headers:
+        Authorization: "Bearer my-token"
+        X-Source: tokenmeter
+```
+
+The JSON payload is the full `UsageEvent` struct. Non-2xx responses are logged as warnings and do not cause retries or event drops.
+
+!!! tip "Cost alerts"
+    For threshold-based alerts, use the [costalert middleware](middleware.md#costalert-middleware) instead of — or alongside — the webhook sink.
 
 ## Prometheus sink config
 

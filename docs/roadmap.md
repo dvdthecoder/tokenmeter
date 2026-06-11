@@ -17,7 +17,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 9 | v0.9 | Local SLM insights (on-device, Ollama) | ✅ Done |
 | 10 | v0.10 | VS Code extension — status bar + usage dashboard | ✅ Done |
 | 11 | v0.11 | Central collection hardening + GDPR facade | ✅ Done |
-| 12 | v0.12 | Plugin scaffold + webhook + cost alerts | Planned |
+| 12 | v0.12 | Webhook sink + cost alerts | ✅ Done |
 | 13 | v0.13 | Integration test harness — end-to-end smoke tests | Planned |
 | 14 | v0.14 | Cursor + Windsurf backend adapters | ✅ Done |
 
@@ -132,13 +132,10 @@ GDPR tooling is sequenced here because it's the privacy layer applied *when* dat
 
 [Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-11)
 
-## Planned — Iteration 12 — Plugin scaffold + webhook + cost alerts (v0.12)
+## ✅ Iteration 12 — Webhook sink + cost alerts (v0.12)
 
-- `tokenmeter scaffold` fully implemented for all four plugin types
-- Webhook sink — POST `UsageEvent` JSON to any endpoint
-- Cost-alert middleware — configurable USD threshold → log + webhook
-
-[Open issues →](https://github.com/dvdthecoder/tokenmeter/issues?q=label%3Aiteration-12)
+- **Webhook sink** — async JSON POST of every `UsageEvent` to a configurable endpoint; custom headers (auth); non-2xx logged, never blocks proxy path
+- **Costalert middleware** — fires `slog.Warn` + optional webhook POST when `event.CostUSD >= threshold_usd`; event is never dropped; payload extends `UsageEvent` with `alert` and `threshold_usd` fields
 
 ## Planned — Iteration 13 — Integration test harness (v0.13)
 

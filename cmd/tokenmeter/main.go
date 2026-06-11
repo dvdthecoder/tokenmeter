@@ -36,6 +36,7 @@ import (
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/opencode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/vscode"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/backends/windsurf"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/middleware/costalert"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/middleware/redaction"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/anthropic"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/bedrock"
@@ -44,6 +45,7 @@ import (
 	_ "github.com/dvdthecoder/tokenmeter/plugins/providers/openai"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/otel"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/prometheus"
+	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/webhook"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/sqlite"
 	_ "github.com/dvdthecoder/tokenmeter/plugins/sinks/stdout"
 )

@@ -34,6 +34,17 @@ sinks:
       endpoint: "localhost:4317"   # OTLP gRPC endpoint
       insecure: true
       interval_s: 60
+      # bearer_token: ""           # Authorization: Bearer <token>
+      # tls_ca_cert: ""            # path to CA cert (from generate-certs.sh)
+
+  webhook:
+    enabled: false
+    options:
+      url: ""                      # destination endpoint (required)
+      method: POST
+      timeout_ms: 5000
+      # headers:
+      #   Authorization: "Bearer my-token"
 
   prometheus:
     enabled: false
@@ -56,8 +67,14 @@ middleware: []                # optional chain of transform/gate plugins (runs b
 # middleware:
 #   - name: redaction
 #     options:
+#       enabled: true
 #       patterns: ['\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b']
 #       fields: [username, service_id]
+#   - name: costalert
+#     options:
+#       enabled: true
+#       threshold_usd: 0.10        # alert when a single request exceeds this
+#       webhook_url: ""            # optional POST target for alert payload
 
 retention:
   days: 90                    # auto-purge events older than this on startup

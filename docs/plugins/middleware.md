@@ -24,6 +24,7 @@ tokenmeter scaffold middleware costalert
 | Name | Status | Config key |
 |---|---|---|
 | `redaction` | ✅ Available | `middleware[].name: redaction` |
+| `costalert` | ✅ Available | `middleware[].name: costalert` |
 
 ## Redaction middleware
 
@@ -55,6 +56,36 @@ Each matching substring is replaced with `[REDACTED]`. Patterns are applied to e
 
 !!! note
     Redaction runs at the middleware layer — after token counts and cost are captured, but before any persistence. It cannot affect billing accuracy.
+
+## Costalert middleware
+
+Fires a `slog.Warn` and an optional webhook POST when a single request exceeds a USD cost threshold. The event is never dropped — alerts are informational only.
+
+```yaml
+middleware:
+  - name: costalert
+    options:
+      enabled: true
+      threshold_usd: 0.10         # alert when event.CostUSD >= this value
+      webhook_url: ""             # optional; POST alert payload here
+      timeout_ms: 3000            # webhook request timeout
+```
+
+The webhook payload extends `UsageEvent` with two fields:
+
+```json
+{
+  "alert": "cost_threshold_exceeded",
+  "threshold_usd": 0.10,
+  "request_id": "...",
+  "model": "claude-opus-4-1",
+  "cost_usd": 0.52,
+  ...
+}
+```
+
+!!! tip
+    Combine with the [webhook sink](sinks.md#webhook-sink-config) to get both per-event delivery and threshold alerts, or use costalert alone for noisy-event suppression.
 
 ## Writing custom middleware
 
