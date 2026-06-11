@@ -20,6 +20,7 @@ tokenmeter is built in focused iterations. Each ships a working, tested slice �
 | 12 | v0.12 | Webhook sink + cost alerts | ✅ Done |
 | 13 | v0.13 | Integration test harness — end-to-end smoke tests | Planned |
 | 14 | v0.14 | Cursor + Windsurf backend adapters | ✅ Done |
+| 15 | v0.15 | Live terminal dashboard (`tokenmeter top`) | ✅ Done |
 
 ---
 
@@ -154,6 +155,18 @@ End-to-end smoke tests that fire real HTTP through a live proxy and assert SQLit
 - **Cursor** — detects install via `cursor` binary or config dir, patches `settings.json` with `http.proxy` for MITM; `ANTHROPIC_BASE_URL` / `OPENAI_BASE_URL` set by global `tokenmeter install`; macOS, Linux, Windows
 - **Windsurf** — same pattern; config dir `~/Library/Application Support/Windsurf/User/`
 - Both auto-detected by `tokenmeter install` and verified by `tokenmeter verify`
+
+## ✅ Iteration 15 — Live terminal dashboard (v0.15)
+
+`tokenmeter top` — an abtop-inspired live TUI that surfaces usage in real time without opening a browser:
+
+- **bubbletea** model polling SQLite every 2 s via an incremental watermark query (no re-processing of old events)
+- **Stats bar**: cumulative req count, tokens in/out/cached, total cost, average tok/s since session start
+- **Event table**: newest events first, 8-column fixed-width layout (time, provider, model, user, in, out, cost, tok/s); vim-style scroll (`j`/`k`, `g`/`G`)
+- **Proxy health indicator**: green ● with PID when daemon is running, red ○ when stopped
+- **`r` reset**: clears accumulated stats and event buffer, restarts the since-clock
+- **`--json` flag**: streams ndjson to stdout for scripting/piping instead of launching the TUI
+- 7 unit tests: rendering (with and without events), stats accumulation, reset, quit keybinding, scroll clamping, window resize
 
 ---
 

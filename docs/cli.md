@@ -183,6 +183,38 @@ The dashboard auto-refreshes every 10 seconds. Use the time-window buttons (1 h 
 
 ---
 
+## `tokenmeter top`
+
+Live terminal dashboard that streams usage events from the local SQLite database and displays rolling stats. The proxy does not need to be running — `top` reads the DB directly.
+
+```sh
+tokenmeter top
+tokenmeter top --json          # stream ndjson to stdout instead of launching the TUI
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--json` | `false` | Print newline-delimited JSON instead of the interactive TUI |
+
+**TUI keybindings:**
+
+| Key | Action |
+|---|---|
+| `q` / `Ctrl-C` / `Esc` | Quit |
+| `r` | Reset stats and event buffer, restart since-clock |
+| `j` / `↓` | Scroll down |
+| `k` / `↑` | Scroll up |
+| `g` / `Home` | Jump to top (newest) |
+| `G` / `End` | Jump to bottom (oldest) |
+
+**Stats bar** shows cumulative totals since the session started (or last reset): request count, tokens in/out/cached, total cost USD, and average output tokens/sec.
+
+The **proxy health indicator** in the top-right corner shows a green ● with PID when the daemon is running, and a red ○ when stopped.
+
+`--json` mode polls every 2 s and prints one JSON object per event to stdout, suitable for piping into `jq` or other tools.
+
+---
+
 ## `tokenmeter insights`
 
 Generate AI-powered insights from local usage data using a locally running [Ollama](https://ollama.com) SLM. The context sent to Ollama contains only aggregated token counts and costs — never any prompt or response content.
