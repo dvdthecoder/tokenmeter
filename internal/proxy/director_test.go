@@ -63,18 +63,22 @@ func TestDirectorAnthropicPassthroughConfiguredUpstream(t *testing.T) {
 	}
 }
 
-// TestDirectorNoMatchNoAnthropicHeaders verifies that requests without
-// Anthropic headers and no matching provider leave the URL unmodified
-// (the reverse proxy will error, which is intentional).
+// TestDirectorNoMatchNoAnthropicHeaders verifies that requests with no provider
+// match and no anthropic-version/x-api-key are still forwarded to api.anthropic.com.
+// This covers Claude Code OAuth token refresh (Authorization: Bearer claude_xxx)
+// and /v1/models calls that carry no provider-identifying headers — dropping them
+// breaks Claude Code auth.
 func TestDirectorNoMatchNoAnthropicHeaders(t *testing.T) {
 	p := newTestProxy()
-	req, _ := http.NewRequest(http.MethodGet, "http://127.0.0.1:4191/some/random/path", nil)
-	originalHost := req.URL.Host
+	req, _ := http.NewRequest(http.MethodGet, "http://127.0.0.1:4191/oauth/token", nil)
+	req.Header.Set("Authorization", "Bearer claude_oauth_refresh_token")
 
 	p.director(req)
 
-	// URL host is unchanged — proxy will 502, which is correct for unknown routes.
-	if req.URL.Host != originalHost {
-		t.Errorf("host changed unexpectedly: %q → %q", originalHost, req.URL.Host)
+	if req.URL.Host != "api.anthropic.com" {
+		t.Errorf("host: got %q, want api.anthropic.com", req.URL.Host)
+	}
+	if req.URL.Scheme != "https" {
+		t.Errorf("scheme: got %q, want https", req.URL.Scheme)
 	}
 }

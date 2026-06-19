@@ -119,27 +119,23 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (p *Proxy) director(req *http.Request) {
 	provider, ok := providers.Detect(req)
 	if !ok {
-		// Anthropic-destined requests that slip through provider detection
-		// (OAuth, model listing, any path without anthropic-version header) must
-		// still reach the real API. Forward transparently — no usage is captured.
-		if req.Header.Get("anthropic-version") != "" || req.Header.Get("x-api-key") != "" {
-			base := p.cfg.Proxy.Upstreams["anthropic"]
-			if base == "" {
-				base = "https://api.anthropic.com"
-			}
-			if upstream, err := url.Parse(base); err == nil {
-				req.URL.Scheme = upstream.Scheme
-				req.URL.Host = upstream.Host
-				req.Host = upstream.Host
-				req.Header.Del("X-Forwarded-For")
-				slog.Debug("anthropic passthrough (no provider match)", "path", req.URL.Path)
-			}
-			return
+		// No provider matched — forward to the Anthropic upstream transparently.
+		// This covers OAuth token refresh (Authorization: Bearer claude_xxx),
+		// model listing (/v1/models), and any other endpoint that reaches the
+		// proxy without anthropic-version or x-api-key headers. Dropping these
+		// breaks Claude Code auth; passing through is always safe.
+		// No usage event is emitted for pass-through requests.
+		base := p.cfg.Proxy.Upstreams["anthropic"]
+		if base == "" {
+			base = "https://api.anthropic.com"
 		}
-		slog.Warn("no provider matched",
-			"host", req.Host, "path", req.URL.Path,
-			"tip", "set ANTHROPIC_BASE_URL or OPENAI_BASE_URL=http://127.0.0.1:4191",
-		)
+		if upstream, err := url.Parse(base); err == nil {
+			req.URL.Scheme = upstream.Scheme
+			req.URL.Host = upstream.Host
+			req.Host = upstream.Host
+			req.Header.Del("X-Forwarded-For")
+			slog.Debug("anthropic passthrough (no provider match)", "path", req.URL.Path)
+		}
 		return
 	}
 
