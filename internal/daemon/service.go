@@ -79,18 +79,24 @@ func installLaunchd(binary, configPath string) error {
 		return fmt.Errorf("write plist: %w", err)
 	}
 
-	// Unload first in case it was already loaded (idempotent re-install).
-	_ = runCmd("launchctl", "unload", plistPath)
-	if err := runCmd("launchctl", "load", "-w", plistPath); err != nil {
-		return fmt.Errorf("launchctl load: %w", err)
+	// bootout first (idempotent — ignore error if not loaded).
+	_ = runCmd("launchctl", "bootout", launchdTarget(), plistPath)
+	if err := runCmd("launchctl", "bootstrap", launchdTarget(), plistPath); err != nil {
+		return fmt.Errorf("launchctl bootstrap: %w", err)
 	}
 	return nil
 }
 
 func uninstallLaunchd() error {
 	plistPath := LaunchAgentPlist()
-	_ = runCmd("launchctl", "unload", "-w", plistPath)
+	_ = runCmd("launchctl", "bootout", launchdTarget(), plistPath)
 	return os.Remove(plistPath)
+}
+
+// launchdTarget returns the gui/<uid> domain used by modern launchctl (macOS 11+).
+// The legacy "load/unload" API is deprecated and unreliable on macOS 12+.
+func launchdTarget() string {
+	return fmt.Sprintf("gui/%d", os.Getuid())
 }
 
 // --- Linux systemd user unit ---

@@ -14,14 +14,18 @@ const (
 )
 
 // envBlock is injected into the shell RC file by PatchShell.
-// Both vars point to the loopback proxy so every tool is intercepted.
+// It starts the daemon in the background if it is not already running, then
+// sets the proxy env vars. The pgrep check avoids spawning duplicate daemons;
+// the nohup ensures the daemon outlives the shell that starts it.
 const envBlock = `# tokenmeter — begin
+pgrep -qf "tokenmeter start" 2>/dev/null || nohup tokenmeter start >/dev/null 2>&1 &
 export ANTHROPIC_BASE_URL=http://127.0.0.1:4191
 export OPENAI_BASE_URL=http://127.0.0.1:4191
 # tokenmeter — end`
 
 // fishBlock is the fish-shell equivalent.
 const fishBlock = `# tokenmeter — begin
+pgrep -qf "tokenmeter start" >/dev/null 2>&1; or nohup tokenmeter start >/dev/null 2>&1 &
 set -gx ANTHROPIC_BASE_URL http://127.0.0.1:4191
 set -gx OPENAI_BASE_URL http://127.0.0.1:4191
 # tokenmeter — end`
