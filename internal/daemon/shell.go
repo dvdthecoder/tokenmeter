@@ -30,8 +30,10 @@ set -gx ANTHROPIC_BASE_URL http://127.0.0.1:4191
 set -gx OPENAI_BASE_URL http://127.0.0.1:4191
 # tokenmeter — end`
 
-// PatchShell appends the tokenmeter env-var block to the user's shell RC file.
-// Idempotent: if the block is already present, it does nothing.
+// PatchShell writes the tokenmeter env-var block to the user's shell RC file.
+// Idempotent: if the current block is already present verbatim, it does
+// nothing. If an older block is present (e.g. from a version before an
+// envBlock change), it replaces it so upgrades actually take effect.
 // Returns the path of the file that was (or would be) patched.
 func PatchShell() (string, error) {
 	rc, block, err := shellRCFile()
@@ -40,17 +42,20 @@ func PatchShell() (string, error) {
 	}
 
 	existing, _ := os.ReadFile(rc)
-	if strings.Contains(string(existing), blockBegin) {
-		return rc, nil // already patched
+	if strings.Contains(string(existing), block) {
+		return rc, nil // already patched with the current block
 	}
 
-	f, err := os.OpenFile(rc, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
-	if err != nil {
+	base := strings.TrimRight(stripBlock(string(existing)), "\n")
+	updated := block + "\n"
+	if base != "" {
+		updated = base + "\n\n" + updated
+	}
+
+	if err := os.WriteFile(rc, []byte(updated), 0o644); err != nil {
 		return rc, fmt.Errorf("patch shell %s: %w", rc, err)
 	}
-	defer f.Close()
-	_, err = fmt.Fprintf(f, "\n%s\n", block)
-	return rc, err
+	return rc, nil
 }
 
 // UnpatchShell removes the tokenmeter env-var block from the shell RC file.
@@ -68,7 +73,14 @@ func UnpatchShell() (string, error) {
 		return rc, err
 	}
 
-	lines := strings.Split(string(content), "\n")
+	result := strings.TrimRight(stripBlock(string(content)), "\n") + "\n"
+	return rc, os.WriteFile(rc, []byte(result), 0o644)
+}
+
+// stripBlock removes any tokenmeter env-var block (old or new) from content,
+// identified by the blockBegin/blockEnd marker comments.
+func stripBlock(content string) string {
+	lines := strings.Split(content, "\n")
 	var keep []string
 	inBlock := false
 	for _, line := range lines {
@@ -83,10 +95,7 @@ func UnpatchShell() (string, error) {
 			}
 		}
 	}
-
-	// Trim trailing blank lines added by PatchShell.
-	result := strings.TrimRight(strings.Join(keep, "\n"), "\n") + "\n"
-	return rc, os.WriteFile(rc, []byte(result), 0o644)
+	return strings.Join(keep, "\n")
 }
 
 // shellRCFile returns the RC file path and the appropriate env block for the

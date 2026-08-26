@@ -267,6 +267,14 @@ func cmdStart() *cobra.Command {
 				}
 			}()
 
+			// Recorded so `tokenmeter status`/`stop` can find this process
+			// whether it was launched via launchd, the shell auto-start
+			// guard, or `tokenmeter daemon`.
+			if err := daemon.WritePID(os.Getpid()); err != nil {
+				slog.Warn("write pid file", "err", err)
+			}
+			defer daemon.RemovePID()
+
 			// Daily auto-generate insight if configured.
 			if cfg.Insights.Enabled && cfg.Insights.AutoGenerate == "daily" {
 				go func() {
